@@ -1,0 +1,17 @@
+{
+  "name": "TCG Deck Builder",
+  "short_name": "TCG Builder",
+  "description": "AI-Powered Trading Card Game Deck Assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1117",
+  "theme_color": "#0f1117",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
