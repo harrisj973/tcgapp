@@ -1,4 +1,15 @@
 import { Card, TCGGame, SearchFilters } from "@/types";
+import { ONEPIECE_CARDS } from "./opcg-cards";
+
+// Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
+const OPCG_BANNED_IDS = new Set([
+  "op-op03_040", "op-op06_116", "op-op06_086", "op-op06_047", "op-st10_001",
+]);
+
+// Apply ban flags to One Piece cards
+const ONEPIECE_CARDS_WITH_BANS: Card[] = ONEPIECE_CARDS.map((c) =>
+  OPCG_BANNED_IDS.has(c.id) ? { ...c, banned: true } : c
+);
 
 // Comprehensive card databases with representative cards for each game
 const YGO_CARDS: Card[] = [
@@ -19,20 +30,6 @@ const YGO_CARDS: Card[] = [
   { id: "ygo-15", name: "Mystical Space Typhoon", game: "yugioh", type: "Spell", subtype: "Quick-Play", rarity: "Common", description: "Target 1 Spell/Trap on the field; destroy it.", tags: ["removal"] },
 ];
 
-const ONEPIECE_CARDS: Card[] = [
-  { id: "op-1", name: "Monkey D. Luffy", game: "onepiece", type: "Leader", color: "Red", power: 5000, life: 4, rarity: "Leader", archetype: ["Straw Hat", "Supernovae"], description: "Once per turn, when you play a red character, you may give it +1000 Power for this turn.", tags: ["aggro", "red", "straw-hat"] },
-  { id: "op-2", name: "Roronoa Zoro", game: "onepiece", type: "Character", color: "Green", cost: 3, power: 5000, rarity: "Rare", archetype: ["Straw Hat"], description: "Blocker. When this character would be K.O'd, you may trash 1 card from your hand instead.", tags: ["blocker", "green", "straw-hat"] },
-  { id: "op-3", name: "Nami", game: "onepiece", type: "Character", color: "Purple", cost: 2, power: 2000, rarity: "Common", archetype: ["Straw Hat"], description: "On Play: Draw 1 card.", tags: ["draw", "purple", "straw-hat"] },
-  { id: "op-4", name: "Trafalgar Law", game: "onepiece", type: "Character", color: "Blue", cost: 4, power: 6000, rarity: "Rare", archetype: ["Heart Pirates", "Supernovae"], description: "On Play: Look at the top 3 cards of your deck; add 1 to your hand and place the rest at the bottom.", tags: ["search", "blue", "heart-pirates"] },
-  { id: "op-5", name: "Portgas D. Ace", game: "onepiece", type: "Character", color: "Red", cost: 3, power: 5000, rarity: "Uncommon", archetype: ["Whitebeard Pirates"], description: "Rush. When attacking, give your leader +2000 Power until end of turn.", tags: ["rush", "red", "whitebeard"] },
-  { id: "op-6", name: "Boa Hancock", game: "onepiece", type: "Character", color: "Green", cost: 5, power: 7000, rarity: "Rare", archetype: ["Amazon Lily"], description: "On Play: Rested all opponent characters with 4000 Power or less.", tags: ["control", "green"] },
-  { id: "op-7", name: "Gear 5 Luffy", game: "onepiece", type: "Character", color: "Red", cost: 10, power: 12000, rarity: "Secret Rare", archetype: ["Straw Hat"], description: "This card can only be played from your life area. Cannot be K.O'd by opponent's effects.", tags: ["boss", "red", "straw-hat"] },
-  { id: "op-8", name: "Gum-Gum Pistol", game: "onepiece", type: "Event", color: "Red", cost: 1, rarity: "Common", archetype: ["Straw Hat"], description: "Give your leader or 1 of your characters +3000 Power until end of turn. Add this card to your hand at end of turn.", tags: ["pump", "red"] },
-  { id: "op-9", name: "Fire Fist", game: "onepiece", type: "Event", color: "Red", cost: 3, rarity: "Uncommon", description: "K.O. 1 opponent's character with 5000 Power or less.", tags: ["removal", "red"] },
-  { id: "op-10", name: "Shanks", game: "onepiece", type: "Character", color: "Red", cost: 9, power: 10000, rarity: "Secret Rare", archetype: ["Red Hair Pirates"], description: "On Play: Return all opponent's characters to their hand. Give this character Rush this turn.", tags: ["boss", "bounce", "rush", "red"] },
-  { id: "op-11", name: "Marco", game: "onepiece", type: "Character", color: "Green", cost: 4, power: 6000, rarity: "Rare", archetype: ["Whitebeard Pirates"], description: "Blocker. When this character is K.O'd, draw 1 card.", tags: ["blocker", "draw", "green"] },
-  { id: "op-12", name: "Sanji", game: "onepiece", type: "Character", color: "Red", cost: 4, power: 6000, rarity: "Uncommon", archetype: ["Straw Hat"], description: "On Attack: Give your leader +2000 Power until end of turn.", tags: ["aggro", "red", "straw-hat"] },
-];
 
 const DIGIMON_CARDS: Card[] = [
   { id: "digi-1", name: "Agumon", game: "digimon", type: "Digimon", color: "Red", cost: 3, power: 3000, level: 3, rarity: "Common", archetype: ["Greymon"], description: "On play: You may place 1 card from your hand on the bottom of this Digimon's digivolution cards.", tags: ["rookie", "red"] },
@@ -96,7 +93,7 @@ const DBSFUSION_CARDS: Card[] = [
 
 const ALL_CARDS: Card[] = [
   ...YGO_CARDS,
-  ...ONEPIECE_CARDS,
+  ...ONEPIECE_CARDS_WITH_BANS,
   ...DIGIMON_CARDS,
   ...POKEMON_CARDS,
   ...MTG_CARDS,
