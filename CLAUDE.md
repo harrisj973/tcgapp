@@ -26,7 +26,7 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/types/index.ts` | All shared types — `Card`, `Deck`, `DeckCard`, `TCGGame`, etc. |
 | `src/lib/games.ts` | `GAMES` config array + `getGame(id)` — one entry per supported TCG |
 | `src/lib/card-database.ts` | Aggregates all game card arrays into `ALL_CARDS`; exports `searchCards`, `getCardById`, `getCardsForGame` |
-| `src/lib/opcg-cards.ts` | **~20k-line** array `ONEPIECE_CARDS: Card[]` — the only game with a real card database |
+| `src/lib/opcg-cards.ts` | **~27k-line** array `ONEPIECE_CARDS: Card[]` — the only game with a real card database |
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
@@ -46,7 +46,7 @@ page.tsx (view state machine)
 
 ### One Piece card data
 
-`src/lib/opcg-cards.ts` is the canonical card database for OPCG. Cards are sourced from the [punk-records](https://github.com/buhbbl/punk-records) open-source repo (`english/data/5691NN.json` where NN = set number: OP01=569101, OP08=569108, etc.).
+`src/lib/opcg-cards.ts` is the canonical card database for OPCG. Cards are sourced from the [punk-records](https://github.com/buhbbl/punk-records) open-source repo (`english/data/5691NN.json` where NN = set number: OP01=569101, OP15=569115, etc.). Currently contains **OP01–OP15 + ST01 (~1,792 cards)**.
 
 **Card ID format:** `"op-{setCode}_{num}"` e.g. `"op-op08_042"` (lowercase, underscore, 3-digit zero-padded number).
 
@@ -54,6 +54,9 @@ page.tsx (view state machine)
 - Leaders: `life: 5` (mono-color) or `life: 4` (dual-color); no `cost` field
 - Omit `power` entirely for Events, Stages, and Characters with no printed power stat
 - `rarity`: `"Common"` | `"Uncommon"` | `"Rare"` | `"Super Rare"` | `"Secret Rare"` | `"Leader"`
+- Skip `TreasureRare` cards entirely (alternate art; not base set cards)
+- Source JSONs include reprints from other sets — filter to only cards whose ID starts with the target set prefix (e.g. `OP15-`)
+- The `Card` type has no `trigger` field — merge trigger text into `description` (append as `" [Trigger] ..."`)
 
 **Ban list** is applied in `card-database.ts` via `OPCG_BANNED_IDS` (not in `opcg-cards.ts`). Currently banned: `op-op03_040`, `op-op06_116`, `op-op06_086`, `op-op06_047`, `op-st10_001`.
 
