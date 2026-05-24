@@ -26,7 +26,7 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/types/index.ts` | All shared types — `Card`, `Deck`, `DeckCard`, `TCGGame`, etc. |
 | `src/lib/games.ts` | `GAMES` config array + `getGame(id)` — one entry per supported TCG |
 | `src/lib/card-database.ts` | Aggregates all game card arrays into `ALL_CARDS`; exports `searchCards`, `getCardById`, `getCardsForGame` |
-| `src/lib/opcg-cards.ts` | **~27k-line** array `ONEPIECE_CARDS: Card[]` — the only game with a real card database |
+| `src/lib/opcg-cards.ts` | **~32k-line** array `ONEPIECE_CARDS: Card[]` — the only game with a real card database |
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
@@ -46,7 +46,7 @@ page.tsx (view state machine)
 
 ### One Piece card data
 
-`src/lib/opcg-cards.ts` is the canonical card database for OPCG. Cards are sourced from the [punk-records](https://github.com/buhbbl/punk-records) open-source repo (`english/data/5691NN.json` where NN = set number: OP01=569101, OP15=569115, etc.). Currently contains **OP01–OP15 + ST01 (~1,792 cards)**.
+`src/lib/opcg-cards.ts` is the canonical card database for OPCG. Cards are sourced from the [punk-records](https://github.com/buhbbl/punk-records) open-source repo. Pack IDs: OP01=569101…OP15=569115; ST01=569001…ST29=569029; EB01=569201…EB03=569203; PRB01=569301. Currently contains **OP01–OP15 + ST01–ST29 (~2,110 cards)**.
 
 **Card ID format:** `"op-{setCode}_{num}"` e.g. `"op-op08_042"` (lowercase, underscore, 3-digit zero-padded number).
 
