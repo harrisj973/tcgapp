@@ -1,5 +1,6 @@
 import { Card, TCGGame, SearchFilters } from "@/types";
 import { ONEPIECE_CARDS } from "./opcg-cards";
+import { GUNDAM_CARDS } from "./gundam-cards";
 
 // Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
 const OPCG_BANNED_IDS = new Set([
@@ -80,11 +81,6 @@ const UNIONARENA_CARDS: Card[] = [
   { id: "ua-3", name: "Goku", game: "unionarena", type: "Character", color: "Yellow", cost: 4, power: 6000, rarity: "Ultra Rare", archetype: ["Dragon Ball"], description: "Rush. Super: Add 1 card from your deck to your hand.", tags: ["rush", "yellow", "dragonball"] },
 ];
 
-const GUNDAM_CARDS: Card[] = [
-  { id: "gun-1", name: "RX-78-2 Gundam", game: "gundam", type: "Unit", color: "Blue", cost: 4, power: 6000, rarity: "Rare", description: "When deployed: Give 1 allied unit +2000 Power until end of turn.", tags: ["mobile-suit", "blue"] },
-  { id: "gun-2", name: "Amuro Ray", game: "gundam", type: "Pilot", color: "Blue", cost: 2, rarity: "Rare", description: "When this pilot sorteys, draw 1 card. Piloting Bonus: +1000 Power.", tags: ["pilot", "blue"] },
-  { id: "gun-3", name: "Char's Zaku II", game: "gundam", type: "Unit", color: "Red", cost: 3, power: 5000, rarity: "Uncommon", description: "Speed. When this unit attacks, give it +2000 Power.", tags: ["mobile-suit", "red", "speed"] },
-];
 
 const DBSFUSION_CARDS: Card[] = [
   { id: "fw-1", name: "Son Goku FW01-001", game: "dbsfusion", type: "Leader", color: "Red", power: 10000, rarity: "Leader", description: "Once per turn, your Red Battle cards get [Sparking 1] when they attack.", tags: ["leader", "red", "goku"] },
