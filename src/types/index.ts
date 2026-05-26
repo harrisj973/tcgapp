@@ -8,7 +8,8 @@ export type TCGGame =
   | "pokemon"
   | "unionarena"
   | "mtg"
-  | "lorcana";
+  | "lorcana"
+  | "swu";
 
 export interface GameConfig {
   id: TCGGame;

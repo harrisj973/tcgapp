@@ -102,6 +102,16 @@ export const GAMES: GameConfig[] = [
     deckSize: { min: 60, max: 60 },
     description: "Illumineer your way to glory",
   },
+  {
+    id: "swu",
+    name: "Star Wars: Unlimited",
+    shortName: "SWU",
+    icon: "⚔️",
+    color: "#FFE81F",
+    gradient: "from-gray-900 via-yellow-900 to-yellow-600",
+    deckSize: { min: 50, max: 50 },
+    description: "May the Force be with you",
+  },
 ];
 
 export function getGame(id: TCGGame): GameConfig {

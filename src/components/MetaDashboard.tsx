@@ -109,6 +109,16 @@ const META_DATA: Record<TCGGame, {
     banlistDate: "April 2026",
     recentChanges: ["No cards currently banned in Lorcana"],
   },
+  swu: {
+    topDecks: [
+      { name: "Luke Skywalker Aggro", tier: "S", winRate: 63, popularity: 26 },
+      { name: "Vader Control", tier: "A", winRate: 59, popularity: 22 },
+      { name: "Boba Fett Bounty", tier: "A", winRate: 57, popularity: 18 },
+      { name: "Han Solo Ramp", tier: "B", winRate: 52, popularity: 14 },
+    ],
+    banlistDate: "May 2026",
+    recentChanges: ["No cards currently banned in Star Wars: Unlimited"],
+  },
 };
 
 const tierColors: Record<string, string> = {
