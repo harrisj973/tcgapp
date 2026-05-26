@@ -2,6 +2,7 @@ import { Card, TCGGame, SearchFilters } from "@/types";
 import { ONEPIECE_CARDS } from "./opcg-cards";
 import { GUNDAM_CARDS } from "./gundam-cards";
 import { POKEMON_CARDS } from "./pokemon-cards";
+import { LORCANA_CARDS } from "./lorcana-cards";
 
 // Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
 const OPCG_BANNED_IDS = new Set([
@@ -86,6 +87,7 @@ const ALL_CARDS: Card[] = [
   ...UNIONARENA_CARDS,
   ...GUNDAM_CARDS,
   ...DBSFUSION_CARDS,
+  ...LORCANA_CARDS,
 ];
 
 export function getCardsForGame(game: TCGGame): Card[] {

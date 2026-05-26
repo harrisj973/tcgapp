@@ -7,7 +7,8 @@ export type TCGGame =
   | "dbsfusion"
   | "pokemon"
   | "unionarena"
-  | "mtg";
+  | "mtg"
+  | "lorcana";
 
 export interface GameConfig {
   id: TCGGame;

@@ -92,6 +92,16 @@ export const GAMES: GameConfig[] = [
     deckSize: { min: 60, max: 250 },
     description: "The original trading card game",
   },
+  {
+    id: "lorcana",
+    name: "Disney Lorcana",
+    shortName: "LOR",
+    icon: "✨",
+    color: "#8B5CF6",
+    gradient: "from-purple-900 via-violet-700 to-indigo-500",
+    deckSize: { min: 60, max: 60 },
+    description: "Illumineer your way to glory",
+  },
 ];
 
 export function getGame(id: TCGGame): GameConfig {

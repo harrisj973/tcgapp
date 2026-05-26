@@ -99,6 +99,16 @@ const META_DATA: Record<TCGGame, {
     banlistDate: "February 2025",
     recentChanges: ["Char's Zaku II limited to 2"],
   },
+  lorcana: {
+    topDecks: [
+      { name: "Amber/Amethyst Control", tier: "S", winRate: 65, popularity: 28 },
+      { name: "Ruby/Sapphire Aggro", tier: "A", winRate: 60, popularity: 22 },
+      { name: "Emerald/Steel Midrange", tier: "A", winRate: 57, popularity: 18 },
+      { name: "Amber/Emerald Ramp", tier: "B", winRate: 53, popularity: 14 },
+    ],
+    banlistDate: "April 2026",
+    recentChanges: ["No cards currently banned in Lorcana"],
+  },
 };
 
 const tierColors: Record<string, string> = {
@@ -217,7 +227,7 @@ export function MetaDashboard({ game }: MetaDashboardProps) {
             )}
             <div className="flex justify-between text-gray-400">
               <span>Max Copies</span>
-              <span className="text-white">{game === "pokemon" || game === "mtg" ? "4 per card" : "3 per card"}</span>
+              <span className="text-white">{game === "pokemon" || game === "mtg" || game === "lorcana" ? "4 per card" : "3 per card"}</span>
             </div>
           </div>
         </div>
