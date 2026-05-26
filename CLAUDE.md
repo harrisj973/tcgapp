@@ -26,7 +26,9 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/types/index.ts` | All shared types — `Card`, `Deck`, `DeckCard`, `TCGGame`, etc. |
 | `src/lib/games.ts` | `GAMES` config array + `getGame(id)` — one entry per supported TCG |
 | `src/lib/card-database.ts` | Aggregates all game card arrays into `ALL_CARDS`; exports `searchCards`, `getCardById`, `getCardsForGame` |
-| `src/lib/opcg-cards.ts` | **~32k-line** array `ONEPIECE_CARDS: Card[]` — the only game with a real card database |
+| `src/lib/opcg-cards.ts` | **~34k-line** array `ONEPIECE_CARDS: Card[]` — One Piece card database (~2,313 cards) |
+| `src/lib/gundam-cards.ts` | **~7.6k-line** array `GUNDAM_CARDS: Card[]` — Gundam Card Game database (487 cards) |
+| `src/lib/pokemon-cards.ts` | **~29k-line** array `POKEMON_CARDS: Card[]` — Pokémon TCG standard-legal cards (2,079 cards) |
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
@@ -44,23 +46,40 @@ page.tsx (view state machine)
 └── MetaDashboard       — static meta tier list per game
 ```
 
-### One Piece card data
+### Card databases
 
-`src/lib/opcg-cards.ts` is the canonical card database for OPCG. Cards are sourced from the [punk-records](https://github.com/buhbbl/punk-records) open-source repo. Pack IDs: OP01=569101…OP15=569115; ST01=569001…ST29=569029; EB01=569201…EB03=569203; PRB01=569301. Currently contains **OP01–OP15 + ST01–ST29 (~2,110 cards)**.
+Three games have full real card databases in dedicated files; the rest (Yu-Gi-Oh, Digimon, MTG, DBS, Union Arena) have small representative stubs inline in `card-database.ts`.
 
-**Card ID format:** `"op-{setCode}_{num}"` e.g. `"op-op08_042"` (lowercase, underscore, 3-digit zero-padded number).
+#### One Piece (`opcg-cards.ts`)
+
+Data source: [punk-records](https://github.com/buhbbl/punk-records) — `english/data/{packId}.json`. Pack IDs: OP01=569101…OP15=569115; ST01=569001…ST29=569029; EB01=569201…EB03=569203. Currently **OP01–OP15 + ST01–ST29 + EB01–EB03 (~2,313 cards)**.
+
+**Card ID format:** `"op-{setCode}_{num}"` e.g. `"op-op08_042"` (lowercase, underscore, 3-digit zero-padded).
 
 **Card shape rules:**
 - Leaders: `life: 5` (mono-color) or `life: 4` (dual-color); no `cost` field
 - Omit `power` entirely for Events, Stages, and Characters with no printed power stat
 - `rarity`: `"Common"` | `"Uncommon"` | `"Rare"` | `"Super Rare"` | `"Secret Rare"` | `"Leader"`
-- Skip `TreasureRare` cards entirely (alternate art; not base set cards)
-- Source JSONs include reprints from other sets — filter to only cards whose ID starts with the target set prefix (e.g. `OP15-`)
-- The `Card` type has no `trigger` field — merge trigger text into `description` (append as `" [Trigger] ..."`)
+- Skip `TreasureRare` cards (alternate art) and reprints from other sets
+- No `trigger` field on `Card` type — merge trigger text into `description` (append `" [Trigger] ..."`)
 
-**Ban list** is applied in `card-database.ts` via `OPCG_BANNED_IDS` (not in `opcg-cards.ts`). Currently banned: `op-op03_040`, `op-op06_116`, `op-op06_086`, `op-op06_047`, `op-st10_001`.
+**Ban list** applied in `card-database.ts` via `OPCG_BANNED_IDS`. Currently banned: `op-op03_040`, `op-op06_116`, `op-op06_086`, `op-op06_047`, `op-st10_001`.
 
-All other games (Yu-Gi-Oh, Digimon, Pokémon, MTG, etc.) have only a small representative sample of cards defined inline in `card-database.ts`.
+#### Gundam Card Game (`gundam-cards.ts`)
+
+Data source: [apitcg/gundam-tcg-data](https://github.com/apitcg/gundam-tcg-data) — `cards/en/{set}.json`. Currently **GD01, GD02, ST01–ST06 (487 cards)**.
+
+**Card ID format:** `"gundam-{setCode}_{num}"` e.g. `"gundam-gd01_001"`.
+
+**Card types:** `UNIT`, `PILOT`, `COMMAND`, `BASE` only — skip `UNIT TOKEN`, `RESOURCE`, `EX BASE`, `EX RESOURCE`. Deck size: 50 cards. Colors: Blue, Green, Red, White, Purple.
+
+#### Pokémon TCG (`pokemon-cards.ts`)
+
+Data source: [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data) — `cards/en/{setId}.json`. Currently **H-on standard rotation: TEF, TWM, SFA, SCR, SSP, PRE, JTG, DRI, BLK, WHF, MEV, PFL, ASH, POR, CHA (2,079 cards)**.
+
+**Card ID format:** `"poke-{setId}_{num}"` e.g. `"poke-sv5_001"`.
+
+**Filtering rules:** Only cards with `legalities.standard === "Legal"`. Exclude alt-art duplicates: `Illustration Rare`, `Special Illustration Rare`, `Hyper Rare`, `Mega Hyper Rare`. Set IDs follow `sv5`…`sv10`, `zsv10pt5` (Black Bolt), `rsv10pt5` (White Flare), `me1`…`me4` (Mega Evolution era).
 
 ### State management
 
