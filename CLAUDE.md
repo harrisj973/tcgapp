@@ -29,6 +29,8 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/lib/opcg-cards.ts` | **~34k-line** array `ONEPIECE_CARDS: Card[]` — One Piece card database (~2,313 cards) |
 | `src/lib/gundam-cards.ts` | **~7.6k-line** array `GUNDAM_CARDS: Card[]` — Gundam Card Game database (487 cards) |
 | `src/lib/pokemon-cards.ts` | **~29k-line** array `POKEMON_CARDS: Card[]` — Pokémon TCG standard-legal cards (2,079 cards) |
+| `src/lib/lorcana-cards.ts` | **~39k-line** array `LORCANA_CARDS: Card[]` — Disney Lorcana database (2,542 cards) |
+| `src/lib/swu-cards.ts` | **~18k-line** array `SWU_CARDS: Card[]` — Star Wars Unlimited database (1,018 cards) |
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
@@ -48,7 +50,7 @@ page.tsx (view state machine)
 
 ### Card databases
 
-Three games have full real card databases in dedicated files; the rest (Yu-Gi-Oh, Digimon, MTG, DBS, Union Arena) have small representative stubs inline in `card-database.ts`.
+Five games have full real card databases in dedicated files; the rest (Yu-Gi-Oh, Digimon, MTG, DBS, Union Arena) have small representative stubs inline in `card-database.ts`.
 
 #### One Piece (`opcg-cards.ts`)
 
@@ -81,9 +83,25 @@ Data source: [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon
 
 **Filtering rules:** Only cards with `legalities.standard === "Legal"`. Exclude alt-art duplicates: `Illustration Rare`, `Special Illustration Rare`, `Hyper Rare`, `Mega Hyper Rare`. Set IDs follow `sv5`…`sv10`, `zsv10pt5` (Black Bolt), `rsv10pt5` (White Flare), `me1`…`me4` (Mega Evolution era).
 
+#### Disney Lorcana (`lorcana-cards.ts`)
+
+Data source: [bertcafecito/disney-lorcana-datahub](https://github.com/bertcafecito/disney-lorcana-datahub) — Lorcast API snapshots. Currently **TFC, ROF, ITI, UR, SS, AZS, ARI, ROJ, FAB, WIW, WSP, WUK (2,542 cards)**.
+
+**Card ID format:** `"lorcana-{setCode}_{num}"` e.g. `"lorcana-tfc_001"` (lowercase, 3-digit zero-padded).
+
+**Card types:** Character, Action, Item, Location, Song. Ink colors: Amber, Amethyst, Emerald, Ruby, Sapphire, Steel. Deck size: 60 cards. Max 4 copies per card. **Filtering:** Enchanted rarity (alternate art) excluded.
+
+#### Star Wars Unlimited (`swu-cards.ts`)
+
+Data source: [erlloyd/star-wars-unlimited-json](https://github.com/erlloyd/star-wars-unlimited-json) — Normal variant cards only. Currently **SOR, SHD, TWI, JTL (1,018 cards)**.
+
+**Card ID format:** `"swu-{setCode}_{num}"` e.g. `"swu-sor_001"` (lowercase, 3-digit zero-padded).
+
+**Card types:** Leader, Base, Unit, Event, Upgrade. Units have arena subtype: Ground or Space. Aspects (colors): Vigilance, Command, Aggression, Cunning, Heroism, Villainy. Deck size: 50 cards + 1 Leader + 1 Base. Max 3 copies per card.
+
 ### State management
 
-Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the full deck list, the active deck ID, and the selected game. The `addCard` action enforces a max of 4 copies per card for Pokémon/MTG and 3 for all other games. One Piece decks use a `leader` field on `Deck` (separate from `cards`).
+Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the full deck list, the active deck ID, and the selected game. The `addCard` action enforces a max of 4 copies per card for Pokémon/MTG/Lorcana and 3 for all other games. One Piece decks use a `leader` field on `Deck` (separate from `cards`).
 
 ### AI analysis
 
