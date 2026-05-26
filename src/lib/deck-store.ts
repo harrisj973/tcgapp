@@ -66,7 +66,7 @@ export const useDeckStore = create<DeckStore>()(
           decks: state.decks.map((deck) => {
             if (deck.id !== deckId) return deck;
             const gameConfig = getGame(deck.game);
-            const maxCopies = deck.game === "pokemon" || deck.game === "mtg" || deck.game === "lorcana" ? 4 : 3;
+            const maxCopies = deck.game === "pokemon" || deck.game === "mtg" || deck.game === "lorcana" || deck.game === "digimon" ? 4 : 3;
 
             const targetCards =
               zone === "extra"

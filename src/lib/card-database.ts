@@ -4,6 +4,7 @@ import { GUNDAM_CARDS } from "./gundam-cards";
 import { POKEMON_CARDS } from "./pokemon-cards";
 import { LORCANA_CARDS } from "./lorcana-cards";
 import { SWU_CARDS } from "./swu-cards";
+import { DIGIMON_CARDS } from "./digimon-cards";
 
 // Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
 const OPCG_BANNED_IDS = new Set([
@@ -35,16 +36,6 @@ const YGO_CARDS: Card[] = [
 ];
 
 
-const DIGIMON_CARDS: Card[] = [
-  { id: "digi-1", name: "Agumon", game: "digimon", type: "Digimon", color: "Red", cost: 3, power: 3000, level: 3, rarity: "Common", archetype: ["Greymon"], description: "On play: You may place 1 card from your hand on the bottom of this Digimon's digivolution cards.", tags: ["rookie", "red"] },
-  { id: "digi-2", name: "Greymon", game: "digimon", type: "Digimon", color: "Red", cost: 5, power: 5000, level: 4, rarity: "Uncommon", archetype: ["Greymon"], description: "Digivolve: 2 from Agumon. Security: Your opponent's Digimon gets -2000 DP for the turn.", tags: ["champion", "red"] },
-  { id: "digi-3", name: "MetalGreymon", game: "digimon", type: "Digimon", color: "Red", cost: 7, power: 8000, level: 5, rarity: "Rare", archetype: ["Greymon"], description: "Digivolve: 3 from Greymon. When attacking, delete 1 opponent's Digimon with 5000 DP or less.", tags: ["ultimate", "red"] },
-  { id: "digi-4", name: "WarGreymon", game: "digimon", type: "Digimon", color: "Red", cost: 12, power: 13000, level: 6, rarity: "Ultra Rare", archetype: ["Greymon"], description: "Digivolve: 4 from MetalGreymon. <Piercing> When this Digimon attacks, delete 1 security card.", tags: ["mega", "red", "piercing"] },
-  { id: "digi-5", name: "Gabumon", game: "digimon", type: "Digimon", color: "Blue", cost: 3, power: 2000, level: 3, rarity: "Common", archetype: ["Garurumon"], description: "On play: Draw 1 card.", tags: ["rookie", "blue"] },
-  { id: "digi-6", name: "Memory Boost!", game: "digimon", type: "Option", color: "None", cost: 1, rarity: "Common", description: "Gain 3 memory. Draw 1 card.", tags: ["memory", "draw", "staple"] },
-  { id: "digi-7", name: "Tai Kamiya", game: "digimon", type: "Tamer", color: "Red", cost: 3, rarity: "Rare", archetype: ["Greymon"], description: "When you digivolve a Digimon, gain 1 memory. Your Digimon with [Greymon] in their name get +1000 DP.", tags: ["tamer", "red"] },
-  { id: "digi-8", name: "Omegamon", game: "digimon", type: "Digimon", color: "White", cost: 14, power: 15000, level: 7, rarity: "Secret Rare", archetype: ["Royal Knights"], description: "Digivolve: 5 from Lv.6. <Rush> Delete 1 opponent's Digimon with 6000 DP or less.", tags: ["mega", "rush", "white"] },
-];
 
 
 const MTG_CARDS: Card[] = [
