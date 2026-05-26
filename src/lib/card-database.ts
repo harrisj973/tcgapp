@@ -1,6 +1,7 @@
 import { Card, TCGGame, SearchFilters } from "@/types";
 import { ONEPIECE_CARDS } from "./opcg-cards";
 import { GUNDAM_CARDS } from "./gundam-cards";
+import { POKEMON_CARDS } from "./pokemon-cards";
 
 // Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
 const OPCG_BANNED_IDS = new Set([
@@ -43,18 +44,6 @@ const DIGIMON_CARDS: Card[] = [
   { id: "digi-8", name: "Omegamon", game: "digimon", type: "Digimon", color: "White", cost: 14, power: 15000, level: 7, rarity: "Secret Rare", archetype: ["Royal Knights"], description: "Digivolve: 5 from Lv.6. <Rush> Delete 1 opponent's Digimon with 6000 DP or less.", tags: ["mega", "rush", "white"] },
 ];
 
-const POKEMON_CARDS: Card[] = [
-  { id: "poke-1", name: "Charizard ex", game: "pokemon", type: "Pokémon", subtype: "Stage 2", hp: 330, color: "Fire", rarity: "Special Rare", archetype: ["Charizard"], description: "Burning Darkness: 30+. This attack does 30 more damage for each Prize card your opponent has taken.", tags: ["boss", "fire", "stage2"] },
-  { id: "poke-2", name: "Charmeleon", game: "pokemon", type: "Pokémon", subtype: "Stage 1", hp: 100, color: "Fire", rarity: "Common", archetype: ["Charizard"], description: "Evolves from Charmander. Evolves into Charizard.", tags: ["fire", "stage1"] },
-  { id: "poke-3", name: "Charmander", game: "pokemon", type: "Pokémon", subtype: "Basic", hp: 60, color: "Fire", rarity: "Common", archetype: ["Charizard"], description: "Collect 1 Fire Energy from your deck.", tags: ["fire", "basic"] },
-  { id: "poke-4", name: "Professor's Research", game: "pokemon", type: "Trainer", subtype: "Supporter", rarity: "Rare", description: "Discard your hand and draw 7 cards.", tags: ["draw", "supporter", "staple"] },
-  { id: "poke-5", name: "Ultra Ball", game: "pokemon", type: "Trainer", subtype: "Item", rarity: "Common", description: "Discard 2 cards from your hand. Search your deck for a Pokémon, reveal it, and put it into your hand.", tags: ["search", "item", "staple"] },
-  { id: "poke-6", name: "Boss's Orders", game: "pokemon", type: "Trainer", subtype: "Supporter", rarity: "Rare", description: "Switch 1 of your opponent's Benched Pokémon with their Active Pokémon.", tags: ["gust", "supporter", "staple"] },
-  { id: "poke-7", name: "Arcanine ex", game: "pokemon", type: "Pokémon", subtype: "Basic", hp: 220, color: "Fire", rarity: "Special Rare", description: "Primal Fangs: 120. Raging Claws: 200, discard 2 Energy.", tags: ["fire", "basic", "ex"] },
-  { id: "poke-8", name: "Radiant Charizard", game: "pokemon", type: "Pokémon", subtype: "Basic", hp: 160, color: "Fire", rarity: "Radiant Rare", description: "Excited Heart: This Pokémon's attacks cost 1 less Energy for each Prize card your opponent has taken.", tags: ["fire", "basic", "radiant"] },
-  { id: "poke-9", name: "Rare Candy", game: "pokemon", type: "Trainer", subtype: "Item", rarity: "Uncommon", description: "Choose 1 of your Basic Pokémon in play. If you have a Stage 2 card in your hand that evolves from that Pokémon, put that card onto the Basic Pokémon. (This counts as evolving that Pokémon.)", tags: ["evolution", "item", "staple"] },
-  { id: "poke-10", name: "Iono", game: "pokemon", type: "Trainer", subtype: "Supporter", rarity: "Rare", description: "Each player shuffles their hand into their deck. Then, each player draws a card for each of their remaining Prize cards.", tags: ["hand-disruption", "supporter", "staple"] },
-];
 
 const MTG_CARDS: Card[] = [
   { id: "mtg-1", name: "Lightning Bolt", game: "mtg", type: "Instant", manaCost: "R", cmc: 1, colors: ["Red"], rarity: "Common", description: "Lightning Bolt deals 3 damage to any target.", tags: ["removal", "burn", "staple"] },
