@@ -31,6 +31,7 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/lib/pokemon-cards.ts` | **~29k-line** array `POKEMON_CARDS: Card[]` — Pokémon TCG standard-legal cards (2,079 cards) |
 | `src/lib/lorcana-cards.ts` | **~39k-line** array `LORCANA_CARDS: Card[]` — Disney Lorcana database (2,542 cards) |
 | `src/lib/swu-cards.ts` | **~18k-line** array `SWU_CARDS: Card[]` — Star Wars Unlimited database (1,018 cards) |
+| `src/lib/digimon-cards.ts` | **~3.3k-line** array `DIGIMON_CARDS: Card[]` — Digimon Card Game database (3,304 cards) |
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
@@ -50,7 +51,7 @@ page.tsx (view state machine)
 
 ### Card databases
 
-Five games have full real card databases in dedicated files; the rest (Yu-Gi-Oh, Digimon, MTG, DBS, Union Arena) have small representative stubs inline in `card-database.ts`.
+Six games have full real card databases in dedicated files; the rest (Yu-Gi-Oh, MTG, DBS, Union Arena) have small representative stubs inline in `card-database.ts`.
 
 #### One Piece (`opcg-cards.ts`)
 
@@ -99,9 +100,19 @@ Data source: [erlloyd/star-wars-unlimited-json](https://github.com/erlloyd/star-
 
 **Card types:** Leader, Base, Unit, Event, Upgrade. Units have arena subtype: Ground or Space. Aspects (colors): Vigilance, Command, Aggression, Cunning, Heroism, Villainy. Deck size: 50 cards + 1 Leader + 1 Base. Max 3 copies per card.
 
+#### Digimon Card Game (`digimon-cards.ts`)
+
+Data source: [apitcg/digimon-tcg-data](https://github.com/apitcg/digimon-tcg-data) — same provider as the Gundam database. Currently **BT01–BT21, EX01–EX09, ST01–ST21, RB01, LM (3,304 cards)**.
+
+**Card ID format:** `"digimon-{setCode}_{num}"` e.g. `"digimon-bt01_001"` (lowercase, 3-digit zero-padded).
+
+**Card types:** Digimon, Tamer, Option, Digi-Egg. Colors: Red, Blue, Yellow, Green, Black, Purple, White. Deck size: 50 cards + up to 5 Digi-Egg cards (separate zone). Max 4 copies per card. **Filtering:** Alt-art (`-p1`/`-p2` suffix), promo (`P-` prefix), and exact-duplicate IDs excluded.
+
+**Key Digimon stats:** `level` (2–7), `power` (DP battle power), `cost` (play cost), `attribute` (Vaccine/Data/Virus/Free/Variable/Unknown), `subtype` (Digimon stage e.g. Rookie/Champion/Mega).
+
 ### State management
 
-Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the full deck list, the active deck ID, and the selected game. The `addCard` action enforces a max of 4 copies per card for Pokémon/MTG/Lorcana and 3 for all other games. One Piece decks use a `leader` field on `Deck` (separate from `cards`).
+Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the full deck list, the active deck ID, and the selected game. The `addCard` action enforces a max of 4 copies per card for Pokémon/MTG/Lorcana/Digimon and 3 for all other games. One Piece decks use a `leader` field on `Deck` (separate from `cards`).
 
 ### AI analysis
 
