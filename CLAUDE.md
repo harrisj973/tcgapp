@@ -32,6 +32,7 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/lib/lorcana-cards.ts` | **~39k-line** array `LORCANA_CARDS: Card[]` — Disney Lorcana database (2,542 cards) |
 | `src/lib/swu-cards.ts` | **~18k-line** array `SWU_CARDS: Card[]` — Star Wars Unlimited database (1,018 cards) |
 | `src/lib/digimon-cards.ts` | **~3.3k-line** array `DIGIMON_CARDS: Card[]` — Digimon Card Game database (3,304 cards) |
+| `src/lib/ua-cards.ts` | **~4k-line** array `UA_CARDS: Card[]` — Union Arena database (4,050 cards) |
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
@@ -51,7 +52,7 @@ page.tsx (view state machine)
 
 ### Card databases
 
-Six games have full real card databases in dedicated files; the rest (Yu-Gi-Oh, MTG, DBS, Union Arena) have small representative stubs inline in `card-database.ts`.
+Seven games have full real card databases in dedicated files; the rest (Yu-Gi-Oh, MTG, DBS, DBS Fusion World) have small representative stubs inline in `card-database.ts`.
 
 #### One Piece (`opcg-cards.ts`)
 
@@ -110,9 +111,19 @@ Data source: [apitcg/digimon-tcg-data](https://github.com/apitcg/digimon-tcg-dat
 
 **Key Digimon stats:** `level` (2–7), `power` (DP battle power), `cost` (play cost), `attribute` (Vaccine/Data/Virus/Free/Variable/Unknown), `subtype` (Digimon stage e.g. Rookie/Champion/Mega).
 
+#### Union Arena (`ua-cards.ts`)
+
+Data source: [TMacaroni/Union-Arena-TCGA](https://github.com/TMacaroni/Union-Arena-TCGA) — `CardList.json`. Currently **18 main sets + EX01–EX06 (4,050 cards)**.
+
+**Card ID format:** `"ua-{setCode}_{num}"` e.g. `"ua-ue01bt_001"` (lowercase, 3-digit zero-padded).
+
+**Card types:** Character, Event, Final Memory (mapped from "Site"). Colors: Red, Blue, Green, Yellow, Purple. Deck size: 50 cards. Max 4 copies per card. **Filtering:** AP resource cards and alt-art variants excluded.
+
+**Franchises covered:** Bleach, Jujutsu Kaisen, Hunter x Hunter, Evangelion, Demon Slayer, Code Geass, Attack on Titan, Black Clover, Rurouni Kenshin, One Punch Man, Fullmetal Alchemist, Yu Yu Hakusho, Tokyo Ghoul, Solo Leveling, Sword Art Online, Kagurabachi, Kaiju No. 8, NIKKE.
+
 ### State management
 
-Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the full deck list, the active deck ID, and the selected game. The `addCard` action enforces a max of 4 copies per card for Pokémon/MTG/Lorcana/Digimon and 3 for all other games. One Piece decks use a `leader` field on `Deck` (separate from `cards`).
+Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the full deck list, the active deck ID, and the selected game. The `addCard` action enforces a max of 4 copies per card for Pokémon/MTG/Lorcana/Digimon/Union Arena and 3 for all other games. One Piece decks use a `leader` field on `Deck` (separate from `cards`).
 
 ### AI analysis
 
