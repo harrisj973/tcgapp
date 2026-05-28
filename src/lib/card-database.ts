@@ -5,6 +5,7 @@ import { POKEMON_CARDS } from "./pokemon-cards";
 import { LORCANA_CARDS } from "./lorcana-cards";
 import { SWU_CARDS } from "./swu-cards";
 import { DIGIMON_CARDS } from "./digimon-cards";
+import { UA_CARDS } from "./ua-cards";
 
 // Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
 const OPCG_BANNED_IDS = new Set([
@@ -57,11 +58,6 @@ const DBS_CARDS: Card[] = [
   { id: "dbs-4", name: "Frieza, Cruel Tyrant", game: "dbs", type: "Battle", color: "Black", cost: 5, power: 25000, rarity: "Ultra Rare", description: "When you play this card, your opponent must choose and send 2 cards from their hand to their Drop Area.", tags: ["hand-disruption", "black"] },
 ];
 
-const UNIONARENA_CARDS: Card[] = [
-  { id: "ua-1", name: "Naruto Uzumaki", game: "unionarena", type: "Character", color: "Red", cost: 2, power: 3000, rarity: "Rare", archetype: ["Naruto"], description: "On attack: Give all your Front Line characters +1000 Power.", tags: ["aggro", "red", "naruto"] },
-  { id: "ua-2", name: "Ichigo Kurosaki", game: "unionarena", type: "Character", color: "Red", cost: 3, power: 5000, rarity: "Ultra Rare", archetype: ["Bleach"], description: "Strike: When this character attacks, draw 1 card.", tags: ["aggro", "red", "bleach"] },
-  { id: "ua-3", name: "Goku", game: "unionarena", type: "Character", color: "Yellow", cost: 4, power: 6000, rarity: "Ultra Rare", archetype: ["Dragon Ball"], description: "Rush. Super: Add 1 card from your deck to your hand.", tags: ["rush", "yellow", "dragonball"] },
-];
 
 
 const DBSFUSION_CARDS: Card[] = [
@@ -76,7 +72,7 @@ const ALL_CARDS: Card[] = [
   ...POKEMON_CARDS,
   ...MTG_CARDS,
   ...DBS_CARDS,
-  ...UNIONARENA_CARDS,
+  ...UA_CARDS,
   ...GUNDAM_CARDS,
   ...DBSFUSION_CARDS,
   ...LORCANA_CARDS,
