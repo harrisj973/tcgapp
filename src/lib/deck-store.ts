@@ -66,7 +66,14 @@ export const useDeckStore = create<DeckStore>()(
           decks: state.decks.map((deck) => {
             if (deck.id !== deckId) return deck;
             const gameConfig = getGame(deck.game);
-            const maxCopies = deck.game === "pokemon" || deck.game === "mtg" || deck.game === "lorcana" || deck.game === "digimon" || deck.game === "unionarena" ? 4 : 3;
+            // For Yu-Gi-Oh, respect banlist flags on the card itself
+            const maxCopies =
+              deck.game === "yugioh"
+                ? card.banned ? 0 : card.limited ? 1 : card.semiLimited ? 2 : 3
+                : deck.game === "pokemon" || deck.game === "mtg" || deck.game === "lorcana" || deck.game === "digimon" || deck.game === "unionarena" ? 4 : 3;
+
+            // Forbidden cards cannot be added at all
+            if (maxCopies === 0) return deck;
 
             const targetCards =
               zone === "extra"

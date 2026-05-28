@@ -6,6 +6,7 @@ import { LORCANA_CARDS } from "./lorcana-cards";
 import { SWU_CARDS } from "./swu-cards";
 import { DIGIMON_CARDS } from "./digimon-cards";
 import { UA_CARDS } from "./ua-cards";
+import { YUGIOH_CARDS } from "./yugioh-cards";
 
 // Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
 const OPCG_BANNED_IDS = new Set([
@@ -16,25 +17,6 @@ const OPCG_BANNED_IDS = new Set([
 const ONEPIECE_CARDS_WITH_BANS: Card[] = ONEPIECE_CARDS.map((c) =>
   OPCG_BANNED_IDS.has(c.id) ? { ...c, banned: true } : c
 );
-
-// Comprehensive card databases with representative cards for each game
-const YGO_CARDS: Card[] = [
-  { id: "ygo-1", name: "Blue-Eyes White Dragon", game: "yugioh", type: "Monster", subtype: "Normal", level: 8, atk: 3000, def: 2500, attribute: "LIGHT", rarity: "Ultra Rare", archetype: ["Blue-Eyes"], description: "This legendary dragon is a powerful engine of destruction.", tags: ["boss", "dragon", "normal"] },
-  { id: "ygo-2", name: "Dark Magician", game: "yugioh", type: "Monster", subtype: "Normal", level: 7, atk: 2500, def: 2100, attribute: "DARK", rarity: "Ultra Rare", archetype: ["Dark Magician"], description: "The ultimate wizard in terms of attack and defense.", tags: ["boss", "spellcaster", "normal"] },
-  { id: "ygo-3", name: "Pot of Greed", game: "yugioh", type: "Spell", subtype: "Normal", rarity: "Super Rare", banned: true, description: "Draw 2 cards.", tags: ["draw", "banned"] },
-  { id: "ygo-4", name: "Monster Reborn", game: "yugioh", type: "Spell", subtype: "Normal", rarity: "Ultra Rare", limited: true, description: "Target 1 monster in either GY; Special Summon it.", tags: ["revival", "limited"] },
-  { id: "ygo-5", name: "Ash Blossom & Joyous Spring", game: "yugioh", type: "Monster", subtype: "Tuner/Effect", level: 3, atk: 0, def: 1800, attribute: "FIRE", rarity: "Secret Rare", archetype: ["Hand Trap"], description: "Hand trap that negates searches, mill, and special summons from deck.", tags: ["handtrap", "staple"] },
-  { id: "ygo-6", name: "Nibiru, the Primal Being", game: "yugioh", type: "Monster", subtype: "Effect", level: 11, atk: 3000, def: 600, attribute: "LIGHT", rarity: "Secret Rare", archetype: ["Hand Trap"], description: "If your opponent Normal or Special Summoned 5+ times this turn, you can Special Summon this.", tags: ["handtrap", "staple"] },
-  { id: "ygo-7", name: "Infinite Impermanence", game: "yugioh", type: "Trap", subtype: "Normal", rarity: "Secret Rare", description: "Target 1 face-up monster your opponent controls; negate its effects until end of turn.", tags: ["negate", "handtrap", "staple"] },
-  { id: "ygo-8", name: "Called by the Grave", game: "yugioh", type: "Spell", subtype: "Quick-Play", rarity: "Rare", description: "Target 1 monster in your opponent's GY; banish it, and if you do, until the end of the next turn, negate the effects of monsters with the same name.", tags: ["handtrap-counter", "staple"] },
-  { id: "ygo-9", name: "Pot of Prosperity", game: "yugioh", type: "Spell", subtype: "Normal", rarity: "Secret Rare", description: "Banish 3 or 6 cards face-down from your Extra Deck; look at that many cards from the top of your Deck, add 1 to your hand, place the rest on the bottom.", tags: ["draw", "staple"] },
-  { id: "ygo-10", name: "Solemn Judgment", game: "yugioh", type: "Trap", subtype: "Counter", rarity: "Ultra Rare", description: "When a monster would be Summoned, OR a Spell/Trap Card is activated: Pay half your LP; negate the Summon or activation, and if you do, destroy that card.", tags: ["negate", "counter-trap"] },
-  { id: "ygo-11", name: "Terraforming", game: "yugioh", type: "Spell", subtype: "Normal", rarity: "Super Rare", limited: true, description: "Add 1 Field Spell Card from your Deck to your hand.", tags: ["search", "field-spell"] },
-  { id: "ygo-12", name: "Dark Ruler No More", game: "yugioh", type: "Spell", subtype: "Normal", rarity: "Super Rare", description: "Negate the effects of all face-up monsters your opponent currently controls, until the end of this turn.", tags: ["board-break", "staple"] },
-  { id: "ygo-13", name: "Crossout Designator", game: "yugioh", type: "Spell", subtype: "Quick-Play", rarity: "Super Rare", description: "Banish 1 card from your Deck; until the end of this turn, negate the effects of all cards with that name.", tags: ["handtrap-counter"] },
-  { id: "ygo-14", name: "Effect Veiler", game: "yugioh", type: "Monster", subtype: "Tuner/Effect", level: 1, atk: 0, def: 0, attribute: "LIGHT", rarity: "Ultra Rare", archetype: ["Hand Trap"], description: "During your opponent's Main Phase: You can send this card from your hand to the GY; negate the effects of 1 face-up monster your opponent controls, until the end of this turn.", tags: ["handtrap"] },
-  { id: "ygo-15", name: "Mystical Space Typhoon", game: "yugioh", type: "Spell", subtype: "Quick-Play", rarity: "Common", description: "Target 1 Spell/Trap on the field; destroy it.", tags: ["removal"] },
-];
 
 
 
@@ -66,7 +48,7 @@ const DBSFUSION_CARDS: Card[] = [
 ];
 
 const ALL_CARDS: Card[] = [
-  ...YGO_CARDS,
+  ...YUGIOH_CARDS,
   ...ONEPIECE_CARDS_WITH_BANS,
   ...DIGIMON_CARDS,
   ...POKEMON_CARDS,
