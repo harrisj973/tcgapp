@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Deck } from "@/types";
 import { exportDeckText, importDeckText, encodeDeckToUrl } from "@/lib/deck-io";
 import { useDeckStore } from "@/lib/deck-store";
-import { X, Copy, Check, Upload, Download, AlertTriangle, Link } from "lucide-react";
+import { X, Copy, Check, Upload, Download, AlertTriangle, Link, Image } from "lucide-react";
+import { DecklistExportImage } from "./DecklistExportImage";
 
 interface DeckIOModalProps {
   deck: Deck;
@@ -18,6 +19,7 @@ export function DeckIOModal({ deck, onClose }: DeckIOModalProps) {
   const [tab, setTab] = useState<Tab>("export");
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showImageExport, setShowImageExport] = useState(false);
   const [importText, setImportText] = useState("");
   const [importResult, setImportResult] = useState<{ matched: number; unmatched: string[] } | null>(null);
   const [imported, setImported] = useState(false);
@@ -118,8 +120,17 @@ export function DeckIOModal({ deck, onClose }: DeckIOModalProps) {
                   {copiedLink ? "Copied!" : "Share Link"}
                 </button>
               </div>
+              <button
+                onClick={() => setShowImageExport(true)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/25"
+              >
+                <Image className="w-4 h-4" />
+                Export as Image
+              </button>
             </>
           )}
+
+          {showImageExport && <DecklistExportImage deck={deck} onClose={() => setShowImageExport(false)} />}
 
           {tab === "import" && (
             <>
