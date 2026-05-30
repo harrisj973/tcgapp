@@ -38,17 +38,27 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
+| `src/lib/card-images.ts` | Derives CDN image URLs from card IDs for each game — no external I/O |
+| `src/lib/card-prices.ts` | Fetches live prices: YGOPRODeck API (YGO) + Scryfall collection API (MTG, up to 75/batch). In-memory cache keyed by card ID. `PRICING_SUPPORTED_GAMES`, `fetchDeckPrices`, `getDeckTotalPrice` |
+| `src/lib/deck-io.ts` | `exportDeckText` / `importDeckText` (parses `4x`/`4 `/`x4` formats); `encodeDeckToUrl` / `decodeDeckFromUrl` (unicode-safe btoa via `encodeURIComponent`) |
+| `src/lib/deck-legality.ts` | `checkDeckLegality(deck): LegalityIssue[]` — validates deck size, banned cards, limited/semi-limited copy counts, and per-game max copies |
+| `src/lib/draw-probability.ts` | Hypergeometric distribution for draw odds. `calculateDrawOdds(entries, deckSize, openingHandSize)` returns opening-hand and by-turn-3 probabilities |
+| `src/lib/card-roles.ts` | Keyword-based role detection: `detectCardRole(card)` scans description/effect/tags and returns one of 11 `CardRole` strings. `groupCardsByRole(deckCards)` used by the Analysis tab |
 
 ### Component tree
 
 ```
 page.tsx (view state machine)
 ├── GameSelector        — horizontal scroll of TCG icons
-├── DeckList            — list of saved decks for current game
-├── DeckBuilder         — 3-tab editor: Search | Cards | Analysis
-│   ├── CardSearch      — calls searchCards(), renders CardItem list
-│   ├── CardItem        — single card row/card with add/remove
-│   └── DeckAnalysisPanel — calls getAIAnalysis() server action
+├── DeckList            — folder/tag organizer; DeckMetaPopover for per-deck color tags + folder assignment
+├── DeckBuilder         — 5-tab editor: Search | Deck | Analysis | Odds | Play
+│   ├── CardSearch      — calls searchCards(), renders CardItem list; grid/list toggle
+│   ├── CardItem        — single card row with add/remove; GridCardTile for grid view
+│   ├── DeckAnalysisPanel — AI insights (server action) + Roles tab (card-roles.ts)
+│   ├── DrawCalcPanel   — hypergeometric draw probability calculator (draw-probability.ts)
+│   ├── PlaytestPanel   — Fisher-Yates shuffle simulator with draw/mulligan/reset
+│   └── DeckIOModal     — Export (text/share URL/image) + Import (text parse) bottom sheet
+│       └── DecklistExportImage — html2canvas PNG export of styled decklist card
 └── MetaDashboard       — static meta tier list per game
 ```
 
@@ -157,7 +167,23 @@ Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the ful
 - **4-copy limit:** pokemon, mtg, lorcana, digimon, unionarena
 - **3-copy limit:** all other games
 
-One Piece decks use a `leader` field on `Deck` (separate from `cards`).
+One Piece decks use a `leader` field on `Deck` (separate from `cards`). Decks support `folder?: string` and `colorTag?: string` for organization (stored in Zustand, persisted to localStorage).
+
+### Deck features
+
+| Feature | Entry point | Notes |
+|---|---|---|
+| Legality check | `checkDeckLegality` → `DeckBuilder` Deck tab | Red ring on illegal card rows; issues panel above card list |
+| Price lookup | `fetchDeckPrices` → price button in DeckBuilder | Only YGO and MTG; in-memory cache; `$0.00` cards cached (isNaN guard) |
+| Draw calculator | `DrawCalcPanel` (Odds tab) | Hypergeometric; `openingHandSize` per game in `games.ts` |
+| Playtest | `PlaytestPanel` (Play tab) | Fisher-Yates shuffle; draw/mulligan/reset; card thumbnails via `card-images.ts` |
+| Import/Export | `DeckIOModal` (ArrowLeftRight button) | Text export, share URL (unicode-safe btoa), PNG via html2canvas |
+| Folder/tags | `DeckList` + `DeckMetaPopover` | Color dots + collapsible folder groups |
+| Role analysis | `DeckAnalysisPanel` Roles tab | `ROLE_PATTERNS` ordered most-specific first (Board Wipe before Removal) |
+
+### Card images (`card-images.ts`)
+
+Game-specific CDN URL derivation — no external I/O, pure function. Supports: YGO (ygoprodeck), MTG (Scryfall), Pokémon (pokemontcg.io), Lorcana (lorcast CDN), One Piece (limitlesstcg), Digimon (apitcg; strips leading zero from set number: `bt01` → `BT1`), Gundam (apitcg), SWU (swu-db CDN). Images shown in search when `cards.length <= 200`; always shown in deck/playtest view.
 
 ### AI analysis
 
