@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import NextImage from "next/image";
 import { Deck, Card, DeckCard } from "@/types";
 import { useDeckStore } from "@/lib/deck-store";
 import { getGame } from "@/lib/games";
+import { getCardImageUrl } from "@/lib/card-images";
 import { CardSearch } from "@/components/cards/CardSearch";
 import { CardItem } from "@/components/cards/CardItem";
 import { DeckAnalysisPanel } from "@/components/analysis/DeckAnalysisPanel";
-import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2, TrendingUp } from "lucide-react";
+import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2, TrendingUp, LayoutGrid, List } from "lucide-react";
 import { DeckIOModal } from "./DeckIOModal";
 import { DrawCalcPanel } from "./DrawCalcPanel";
 import { fetchDeckPrices, getDeckTotalPrice, PRICING_SUPPORTED_GAMES } from "@/lib/card-prices";
@@ -96,12 +98,39 @@ function groupByType(cards: DeckCard[]): Array<{ label: string; cards: DeckCard[
     });
 }
 
+function GridCardTile({ card, onAdd, onRemove }: { card: Card; onAdd: () => void; onRemove: () => void }) {
+  const imageUrl = getCardImageUrl(card);
+  return (
+    <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-white/5 group cursor-pointer" onClick={onRemove}>
+      {imageUrl ? (
+        <NextImage
+          src={imageUrl}
+          alt={card.name}
+          fill
+          sizes="80px"
+          className="object-cover object-top"
+          onError={(e) => { (e.currentTarget as HTMLElement).style.display = "none"; }}
+        />
+      ) : (
+        <div className="flex items-center justify-center h-full text-lg">
+          {card.type.includes("Monster") || card.type.includes("Digimon") || card.type.includes("Character") || card.type.includes("Unit") ? "⚔️" : "🃏"}
+        </div>
+      )}
+      {/* Tap-to-remove overlay */}
+      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity flex items-center justify-center">
+        <span className="text-white text-xs font-bold">−1</span>
+      </div>
+    </div>
+  );
+}
+
 export function DeckBuilder({ deck }: DeckBuilderProps) {
   const { addCard, removeCard, renameDeck, getDeckCardCount } = useDeckStore();
   const [activeTab, setActiveTab] = useState<ActiveTab>("search");
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(deck.name);
   const [showIO, setShowIO] = useState(false);
+  const [deckViewMode, setDeckViewMode] = useState<"list" | "grid">("list");
   const [priceMap, setPriceMap] = useState<Map<string, number>>(new Map());
   const [priceFetching, setPriceFetching] = useState(false);
   const [priceFetched, setPriceFetched] = useState(false);
@@ -267,35 +296,69 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
               </div>
             ) : (
               <div className="p-3 space-y-3">
-                <CostCurve cards={deck.cards} />
+                {/* View toggle */}
+                <div className="flex items-center justify-between">
+                  <CostCurve cards={deck.cards} />
+                  <div className="flex items-center gap-0.5 glass rounded-lg p-0.5 ml-2 flex-shrink-0 self-end mb-0">
+                    <button
+                      onClick={() => setDeckViewMode("list")}
+                      className={`p-1.5 rounded transition-all ${deckViewMode === "list" ? "bg-white/15 text-white" : "text-white/25 hover:text-white/50"}`}
+                    >
+                      <List className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setDeckViewMode("grid")}
+                      className={`p-1.5 rounded transition-all ${deckViewMode === "grid" ? "bg-white/15 text-white" : "text-white/25 hover:text-white/50"}`}
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
 
-                {grouped.map(({ label, cards }) => {
-                  const groupTotal = cards.reduce((s, c) => s + c.quantity, 0);
-                  return (
-                    <div key={label}>
-                      <div className="flex items-center gap-2 px-1 mb-1.5">
-                        <span className="text-xs font-semibold text-white/40">{label}</span>
-                        <span className="text-xs text-white/20">({groupTotal})</span>
-                        <div className="flex-1 h-px bg-white/[0.05]" />
+                {deckViewMode === "grid" ? (
+                  // Grid view: card images in a tight grid
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {deck.cards.flatMap((dc) =>
+                      Array.from({ length: dc.quantity }, (_, i) => (
+                        <GridCardTile
+                          key={`${dc.card.id}-${i}`}
+                          card={dc.card}
+                          onAdd={() => handleAddCard(dc.card)}
+                          onRemove={() => handleRemoveCard(dc.card)}
+                        />
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  // List view (existing)
+                  grouped.map(({ label, cards }) => {
+                    const groupTotal = cards.reduce((s, c) => s + c.quantity, 0);
+                    return (
+                      <div key={label}>
+                        <div className="flex items-center gap-2 px-1 mb-1.5">
+                          <span className="text-xs font-semibold text-white/40">{label}</span>
+                          <span className="text-xs text-white/20">({groupTotal})</span>
+                          <div className="flex-1 h-px bg-white/[0.05]" />
+                        </div>
+                        <div className="space-y-1.5">
+                          {cards.map((dc) => (
+                            <CardItem
+                              key={dc.card.id}
+                              card={dc.card}
+                              deck={deck}
+                              quantity={dc.quantity}
+                              showImage={true}
+                              price={priceMap.get(dc.card.id)}
+                              onAdd={handleAddCard}
+                              onRemove={handleRemoveCard}
+                              compact={true}
+                            />
+                          ))}
+                        </div>
                       </div>
-                      <div className="space-y-1.5">
-                        {cards.map((dc) => (
-                          <CardItem
-                            key={dc.card.id}
-                            card={dc.card}
-                            deck={deck}
-                            quantity={dc.quantity}
-                            showImage={true}
-                            price={priceMap.get(dc.card.id)}
-                            onAdd={handleAddCard}
-                            onRemove={handleRemoveCard}
-                            compact={true}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             )}
           </div>
