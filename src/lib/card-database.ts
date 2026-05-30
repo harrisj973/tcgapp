@@ -8,6 +8,7 @@ import { DIGIMON_CARDS } from "./digimon-cards";
 import { UA_CARDS } from "./ua-cards";
 import { YUGIOH_CARDS } from "./yugioh-cards";
 import { MTG_CARDS } from "./mtg-cards";
+import { RIFTBOUND_CARDS } from "./riftbound-cards";
 
 // Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
 const OPCG_BANNED_IDS = new Set([
@@ -49,6 +50,7 @@ const ALL_CARDS: Card[] = [
   ...DBSFUSION_CARDS,
   ...LORCANA_CARDS,
   ...SWU_CARDS,
+  ...RIFTBOUND_CARDS,
 ];
 
 export function getCardsForGame(game: TCGGame): Card[] {

@@ -112,6 +112,16 @@ export const GAMES: GameConfig[] = [
     deckSize: { min: 50, max: 50 },
     description: "May the Force be with you",
   },
+  {
+    id: "riftbound",
+    name: "Riftbound",
+    shortName: "RFT",
+    icon: "💎",
+    color: "#06B6D4",
+    gradient: "from-cyan-900 via-cyan-700 to-blue-500",
+    deckSize: { min: 40, max: 40 },
+    description: "Champions battle across the Rift",
+  },
 ];
 
 export function getGame(id: TCGGame): GameConfig {

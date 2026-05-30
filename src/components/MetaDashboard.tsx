@@ -128,6 +128,16 @@ const META_DATA: Record<TCGGame, {
     banlistDate: "May 2026",
     recentChanges: ["No cards currently banned in Star Wars: Unlimited"],
   },
+  riftbound: {
+    topDecks: [
+      { name: "Annie Fury Burn", tier: "S", winRate: 66, popularity: 28, trend: "up", keyCards: ["Annie, Fiery", "Firestorm"] },
+      { name: "Lux Mind Control", tier: "A", winRate: 60, popularity: 22, trend: "stable", keyCards: ["Lux, Illuminated", "Final Spark"] },
+      { name: "Garen Order Aggro", tier: "A", winRate: 58, popularity: 19, trend: "up", keyCards: ["Garen, Rugged", "Decisive Strike"] },
+      { name: "Yi Green Tempo", tier: "B", winRate: 53, popularity: 14, trend: "down", keyCards: ["Yi, Meditative", "Highlander"] },
+    ],
+    banlistDate: "May 2026",
+    recentChanges: ["No cards currently banned — Origins format is active"],
+  },
 };
 
 const TIER_CONFIG: Record<string, { label: string; badge: string; badgeText: string; border: string }> = {
@@ -291,7 +301,7 @@ export function MetaDashboard({ game }: MetaDashboardProps) {
             <div className="flex justify-between items-center text-xs">
               <span className="text-white/35">Max Copies</span>
               <span className="text-white font-semibold">
-                {game === "pokemon" || game === "mtg" || game === "lorcana" || game === "digimon" || game === "unionarena" ? "4 per card" : "3 per card"}
+                {game === "pokemon" || game === "mtg" || game === "lorcana" || game === "digimon" || game === "unionarena" ? "4 per card" : game === "yugioh" ? "1–3 (banlist)" : "3 per card"}
               </span>
             </div>
           </div>
