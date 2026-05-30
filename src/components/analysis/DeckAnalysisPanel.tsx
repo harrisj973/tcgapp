@@ -3,12 +3,13 @@
 import { useState, useMemo } from "react";
 import { Deck } from "@/types";
 import { analyzeDeck } from "@/lib/synergy-engine";
+import { groupCardsByRole, getRoleColor } from "@/lib/card-roles";
 import { StatBar } from "@/components/ui/StatBar";
 import { SynergyBadge } from "@/components/ui/SynergyBadge";
 import { CardColor } from "@/types";
 import {
   BarChart3, Target, TrendingUp, AlertTriangle,
-  CheckCircle, Lightbulb, Puzzle, Brain, RefreshCw, Layers
+  CheckCircle, Lightbulb, Puzzle, Brain, RefreshCw, Layers, Wand2
 } from "lucide-react";
 
 interface DeckAnalysisPanelProps {
@@ -33,7 +34,7 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
   const [aiInsights, setAiInsights] = useState<string>("");
   const [aiRecs, setAiRecs] = useState<string[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [activeSection, setActiveSection] = useState<"overview" | "synergies" | "recommendations">("overview");
+  const [activeSection, setActiveSection] = useState<"overview" | "synergies" | "recommendations" | "roles">("overview");
 
   const totalCards = deck.cards.reduce((s, dc) => s + dc.quantity, 0);
   const analysis = useMemo(
@@ -41,6 +42,7 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [deck.id, deck.cards]
   );
+  const roleGroups = useMemo(() => groupCardsByRole(deck.cards), [deck.cards]);
 
   const runAIAnalysis = async () => {
     setIsAnalyzing(true);
@@ -81,6 +83,7 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
   const sections = [
     { id: "overview" as const, label: "Overview", icon: BarChart3 },
     { id: "synergies" as const, label: "Synergies", icon: Puzzle },
+    { id: "roles" as const, label: "Roles", icon: Wand2 },
     { id: "recommendations" as const, label: "Tips", icon: Lightbulb },
   ];
 
@@ -284,6 +287,34 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
                   ))}
                 </ul>
               </div>
+            )}
+          </>
+        )}
+
+        {activeSection === "roles" && (
+          <>
+            {roleGroups.length === 0 ? (
+              <div className="text-center py-12">
+                <Wand2 className="w-10 h-10 mx-auto mb-3 text-white/10" />
+                <p className="text-sm text-white/40 font-medium">No roles detected</p>
+                <p className="text-xs text-white/20 mt-1">Cards need description/effect text to be categorized</p>
+              </div>
+            ) : (
+              roleGroups.map(({ role, cards, total }) => (
+                <div key={role} className={`rounded-xl border p-3 ${getRoleColor(role)}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider">{role}</span>
+                    <span className="text-[10px] opacity-60">{total} card{total !== 1 ? "s" : ""}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {cards.map(({ card, quantity }) => (
+                      <span key={card.id} className="text-[10px] px-2 py-0.5 bg-black/20 rounded-full opacity-80">
+                        {quantity > 1 ? `${quantity}× ` : ""}{card.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))
             )}
           </>
         )}
