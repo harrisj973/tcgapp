@@ -33,6 +33,8 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/lib/swu-cards.ts` | **~18k-line** array `SWU_CARDS: Card[]` — Star Wars Unlimited database (1,018 cards) |
 | `src/lib/digimon-cards.ts` | **~3.3k-line** array `DIGIMON_CARDS: Card[]` — Digimon Card Game database (3,304 cards) |
 | `src/lib/ua-cards.ts` | **~4k-line** array `UA_CARDS: Card[]` — Union Arena database (4,050 cards) |
+| `src/lib/yugioh-cards.ts` | **~large** array `YUGIOH_CARDS: Card[]` — Yu-Gi-Oh! database (12,568 unique cards, deduplicated by name) |
+| `src/lib/mtg-cards.ts` | **~large, split into 9 chunk files** `MTG_CARDS: Card[]` — MTG database (24,783 unique cards, deduplicated by oracle_id) |
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
@@ -50,9 +52,24 @@ page.tsx (view state machine)
 └── MetaDashboard       — static meta tier list per game
 ```
 
+### Design system
+
+The app uses a **dark glassmorphism** aesthetic. All surface classes are defined in `globals.css`:
+
+| Class | Usage |
+|---|---|
+| `.glass` | Default card/panel surface — `rgba(255,255,255,0.04)`, `blur(16px)`, `border rgba(255,255,255,0.08)` |
+| `.glass-md` | Modal/elevated surfaces — `rgba(255,255,255,0.06)`, `blur(24px)` |
+| `.glass-nav` | Header/tab-bar — `rgba(7,9,15,0.75)`, `blur(32px)` |
+| `.glow-dot` | Animated indicator dot on active nav items |
+
+Game-specific colors: `game.color` hex is used as an inline `boxShadow` glow on selected GameSelector buttons. Game-specific gradients (`game.gradient`) appear on banners, active deck cards, and buttons — never hard-coded per-game Tailwind classes.
+
+Text opacity scale: primary `text-white`, secondary `text-white/50`, muted `text-white/30`, ghost `text-white/20`. Borders: `border-white/[0.07]` (default), `border-white/15` (hover/active). Never use `bg-gray-*` or `border-gray-*` — use `bg-white/[x]` instead.
+
 ### Card databases
 
-Seven games have full real card databases in dedicated files; the rest (Yu-Gi-Oh, MTG, DBS, DBS Fusion World) have small representative stubs inline in `card-database.ts`.
+Nine games have full real card databases in dedicated files; DBS and DBS Fusion World have small representative stubs inline in `card-database.ts`.
 
 #### One Piece (`opcg-cards.ts`)
 
@@ -121,9 +138,26 @@ Data source: [TMacaroni/Union-Arena-TCGA](https://github.com/TMacaroni/Union-Are
 
 **Franchises covered:** Bleach, Jujutsu Kaisen, Hunter x Hunter, Evangelion, Demon Slayer, Code Geass, Attack on Titan, Black Clover, Rurouni Kenshin, One Punch Man, Fullmetal Alchemist, Yu Yu Hakusho, Tokyo Ghoul, Solo Leveling, Sword Art Online, Kagurabachi, Kaiju No. 8, NIKKE.
 
+#### Yu-Gi-Oh! (`yugioh-cards.ts`)
+
+Deduplicated by card name (one entry per unique card, ignoring reprints). Banlist status is stored directly on `Card`: `banned?: boolean`, `limited?: boolean`, `semiLimited?: boolean`. The deck-store enforces 0/1/2/3 copies respectively for each status.
+
+**Card ID format:** `"ygo-{password}"` e.g. `"ygo-89631139"`. Main deck: 40–60 cards. Extra deck: up to 15 (Fusion/Synchro/Xyz/Link). Max 3 copies (unless banlist restricts).
+
+#### Magic: The Gathering (`mtg-cards.ts`)
+
+Deduplicated by Scryfall `oracle_id` (one entry per unique card face). Split into 9 chunk arrays and concatenated — do not edit the chunks directly; regenerate from source if updating. Deck size: 60 cards. Max 4 copies (except basic lands).
+
+**Card ID format:** `"mtg-{oracleId}"` using Scryfall oracle ID. `manaCost` and `cmc` fields populated from Scryfall data.
+
 ### State management
 
-Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the full deck list, the active deck ID, and the selected game. The `addCard` action enforces a max of 4 copies per card for Pokémon/MTG/Lorcana/Digimon/Union Arena and 3 for all other games. One Piece decks use a `leader` field on `Deck` (separate from `cards`).
+Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the full deck list, the active deck ID, and the selected game. The `addCard` action enforces:
+- **YGO:** 0 copies if `card.banned`, 1 if `card.limited`, 2 if `card.semiLimited`, 3 otherwise
+- **4-copy limit:** pokemon, mtg, lorcana, digimon, unionarena
+- **3-copy limit:** all other games
+
+One Piece decks use a `leader` field on `Deck` (separate from `cards`).
 
 ### AI analysis
 
