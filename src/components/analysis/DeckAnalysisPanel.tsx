@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Deck, DeckAnalysis } from "@/types";
+import { useState, useMemo } from "react";
+import { Deck } from "@/types";
 import { analyzeDeck } from "@/lib/synergy-engine";
 import { StatBar } from "@/components/ui/StatBar";
 import { SynergyBadge } from "@/components/ui/SynergyBadge";
 import { CardColor } from "@/types";
 import {
-  BarChart3, Zap, Target, TrendingUp, AlertTriangle,
+  BarChart3, Target, TrendingUp, AlertTriangle,
   CheckCircle, Lightbulb, Puzzle, Brain, RefreshCw, Layers
 } from "lucide-react";
 
@@ -30,22 +30,17 @@ const synergyCfg: Record<string, string> = {
 };
 
 export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
-  const [analysis, setAnalysis] = useState<DeckAnalysis | null>(null);
   const [aiInsights, setAiInsights] = useState<string>("");
   const [aiRecs, setAiRecs] = useState<string[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeSection, setActiveSection] = useState<"overview" | "synergies" | "recommendations">("overview");
 
   const totalCards = deck.cards.reduce((s, dc) => s + dc.quantity, 0);
-
-  useEffect(() => {
-    if (totalCards > 0) {
-      const result = analyzeDeck(deck);
-      setAnalysis(result);
-    } else {
-      setAnalysis(null);
-    }
-  }, [deck.cards, deck.id]);
+  const analysis = useMemo(
+    () => (totalCards > 0 ? analyzeDeck(deck) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [deck.id, deck.cards]
+  );
 
   const runAIAnalysis = async () => {
     setIsAnalyzing(true);
@@ -58,7 +53,6 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
       const data = await res.json();
       setAiInsights(data.aiInsights || "");
       setAiRecs(data.aiRecommendations || []);
-      if (data.analysis) setAnalysis(data.analysis);
     } catch {
       setAiInsights("AI analysis temporarily unavailable. Using local analysis.");
     } finally {

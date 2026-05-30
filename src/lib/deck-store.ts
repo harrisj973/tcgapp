@@ -3,7 +3,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Deck, DeckCard, Card, TCGGame } from "@/types";
-import { getGame } from "./games";
 
 interface DeckStore {
   decks: Deck[];
@@ -65,7 +64,6 @@ export const useDeckStore = create<DeckStore>()(
         set((state) => ({
           decks: state.decks.map((deck) => {
             if (deck.id !== deckId) return deck;
-            const gameConfig = getGame(deck.game);
             // For Yu-Gi-Oh, respect banlist flags on the card itself
             const maxCopies =
               deck.game === "yugioh"

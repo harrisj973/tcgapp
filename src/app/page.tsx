@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { TCGGame, Deck } from "@/types";
 import { useDeckStore } from "@/lib/deck-store";
 import { GameSelector } from "@/components/GameSelector";
@@ -12,19 +12,21 @@ import { LayersIcon, TrendingUp, ChevronLeft, Sparkles } from "lucide-react";
 type AppView = "home" | "builder" | "meta";
 
 export default function App() {
-  const { selectedGame, setSelectedGame, setActiveDeck, getActiveDeck, decks } = useDeckStore();
+  const { selectedGame, setSelectedGame, setActiveDeck, activeDeckId, decks } = useDeckStore();
   const [view, setView] = useState<AppView>("home");
-  const [activeDeck, setLocalActiveDeck] = useState<Deck | undefined>(undefined);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
-  useEffect(() => {
-    if (mounted) setLocalActiveDeck(getActiveDeck());
-  }, [decks, mounted]);
+  // SSR hydration guard — Zustand reads from localStorage on client only
+  useEffect(() => { setMounted(true); }, []); // eslint-disable-line react-hooks/set-state-in-effect
+
+  // Derive activeDeck from store state; updates whenever decks or activeDeckId change
+  const activeDeck: Deck | undefined = useMemo(
+    () => decks.find((d) => d.id === activeDeckId),
+    [decks, activeDeckId]
+  );
 
   const handleSelectDeck = (deck: Deck) => {
     setActiveDeck(deck.id);
-    setLocalActiveDeck(deck);
     setView("builder");
   };
 

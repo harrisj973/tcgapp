@@ -137,8 +137,6 @@ function detectByTags(deck: Deck): { name: string; confidence: number } {
 
 export function analyzeDeck(deck: Deck): DeckAnalysis {
   const { name: archetype, confidence } = detectArchetype(deck);
-  const totalCards = deck.cards.reduce((s, dc) => s + dc.quantity, 0);
-  const game = deck.game;
 
   // Calculate synergy groups
   const synergies: SynergyGroup[] = buildSynergyGroups(deck);
@@ -289,7 +287,6 @@ function analyzeCardRatios(deck: Deck) {
   } else if (deck.game === "onepiece") {
     const characters = types["Character"] || 0;
     const events = types["Event"] || 0;
-    const stages = types["Stage"] || 0;
 
     result.characters = { current: characters, optimal: "35-42", rating: characters >= 35 && characters <= 42 ? "green" : characters >= 25 ? "yellow" : "red" };
     result.events = { current: events, optimal: "8-15", rating: events >= 8 && events <= 15 ? "green" : events >= 4 ? "yellow" : "red" };
@@ -306,7 +303,7 @@ function analyzeCardRatios(deck: Deck) {
   return result;
 }
 
-function generateRecommendations(deck: Deck, archetype: string): CardRecommendation[] {
+function generateRecommendations(deck: Deck, _archetype: string): CardRecommendation[] {
   const recs: CardRecommendation[] = [];
   const total = deck.cards.reduce((s, dc) => s + dc.quantity, 0);
 
@@ -321,6 +318,14 @@ function generateRecommendations(deck: Deck, archetype: string): CardRecommendat
       reason: `Deck has ${total} cards, needs at least ${optimalMin}`,
       priority: "high",
       action: "add",
+      expectedImpact: "Improved consistency and legality",
+    });
+  } else if (total > optimalMax) {
+    recs.push({
+      cardName: "Too many cards",
+      reason: `Deck has ${total} cards, max is ${optimalMax}`,
+      priority: "high",
+      action: "remove",
       expectedImpact: "Improved consistency and legality",
     });
   }
@@ -397,7 +402,7 @@ function generateWeaknesses(deck: Deck): string[] {
   return weaknesses;
 }
 
-function findMissingPieces(deck: Deck, archetype: string): string[] {
+function findMissingPieces(deck: Deck, _archetype: string): string[] {
   const missing: string[] = [];
   const tags = deck.cards.flatMap((dc) => dc.card.tags || []);
 

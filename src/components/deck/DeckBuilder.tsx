@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Deck, Card, TCGGame, DeckCard } from "@/types";
+import { Deck, Card, DeckCard } from "@/types";
 import { useDeckStore } from "@/lib/deck-store";
 import { getGame } from "@/lib/games";
 import { CardSearch } from "@/components/cards/CardSearch";
