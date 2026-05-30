@@ -21,6 +21,7 @@ export interface GameConfig {
   gradient: string;
   deckSize: { min: number; max: number };
   extraDeckSize?: number;
+  openingHandSize: number;
   description: string;
 }
 

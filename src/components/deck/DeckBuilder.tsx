@@ -7,15 +7,16 @@ import { getGame } from "@/lib/games";
 import { CardSearch } from "@/components/cards/CardSearch";
 import { CardItem } from "@/components/cards/CardItem";
 import { DeckAnalysisPanel } from "@/components/analysis/DeckAnalysisPanel";
-import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2 } from "lucide-react";
+import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2, TrendingUp } from "lucide-react";
 import { DeckIOModal } from "./DeckIOModal";
+import { DrawCalcPanel } from "./DrawCalcPanel";
 import { fetchDeckPrices, getDeckTotalPrice, PRICING_SUPPORTED_GAMES } from "@/lib/card-prices";
 
 interface DeckBuilderProps {
   deck: Deck;
 }
 
-type ActiveTab = "cards" | "search" | "analysis";
+type ActiveTab = "cards" | "search" | "analysis" | "calc";
 
 function buildCostCurve(cards: DeckCard[]): number[] {
   const buckets = [0, 0, 0, 0, 0, 0, 0];
@@ -138,6 +139,7 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
     { id: "search" as ActiveTab, label: "Search", icon: Search },
     { id: "cards" as ActiveTab, label: `Deck (${totalCards})`, icon: LayersIcon },
     { id: "analysis" as ActiveTab, label: "Analysis", icon: BarChart3 },
+    { id: "calc" as ActiveTab, label: "Odds", icon: TrendingUp },
   ];
 
   return (
@@ -301,6 +303,12 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
 
         {activeTab === "analysis" && (
           <DeckAnalysisPanel deck={deck} />
+        )}
+
+        {activeTab === "calc" && (
+          <div className="h-full overflow-y-auto">
+            <DrawCalcPanel deck={deck} />
+          </div>
         )}
       </div>
 

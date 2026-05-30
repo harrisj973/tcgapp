@@ -10,6 +10,7 @@ export const GAMES: GameConfig[] = [
     gradient: "from-yellow-900 via-yellow-700 to-yellow-500",
     deckSize: { min: 40, max: 60 },
     extraDeckSize: 15,
+    openingHandSize: 5,
     description: "The classic duel monsters card game",
   },
   {
@@ -20,6 +21,7 @@ export const GAMES: GameConfig[] = [
     color: "#DC2626",
     gradient: "from-red-900 via-red-700 to-orange-500",
     deckSize: { min: 50, max: 50 },
+    openingHandSize: 5,
     description: "Set sail for the Grand Line",
   },
   {
@@ -30,6 +32,7 @@ export const GAMES: GameConfig[] = [
     color: "#2563EB",
     gradient: "from-blue-900 via-blue-700 to-cyan-500",
     deckSize: { min: 50, max: 50 },
+    openingHandSize: 5,
     description: "Digivolve your way to victory",
   },
   {
@@ -40,6 +43,7 @@ export const GAMES: GameConfig[] = [
     color: "#4B5563",
     gradient: "from-gray-900 via-gray-700 to-blue-600",
     deckSize: { min: 50, max: 50 },
+    openingHandSize: 5,
     description: "Mobile suit tactical battles",
   },
   {
@@ -50,6 +54,7 @@ export const GAMES: GameConfig[] = [
     color: "#F59E0B",
     gradient: "from-orange-900 via-orange-600 to-yellow-400",
     deckSize: { min: 50, max: 60 },
+    openingHandSize: 6,
     description: "Power levels over 9000",
   },
   {
@@ -60,6 +65,7 @@ export const GAMES: GameConfig[] = [
     color: "#7C3AED",
     gradient: "from-purple-900 via-purple-700 to-pink-500",
     deckSize: { min: 50, max: 60 },
+    openingHandSize: 6,
     description: "Fusion warriors unite",
   },
   {
@@ -70,6 +76,7 @@ export const GAMES: GameConfig[] = [
     color: "#EAB308",
     gradient: "from-yellow-700 via-yellow-500 to-red-500",
     deckSize: { min: 60, max: 60 },
+    openingHandSize: 7,
     description: "Gotta catch 'em all",
   },
   {
@@ -80,6 +87,7 @@ export const GAMES: GameConfig[] = [
     color: "#059669",
     gradient: "from-emerald-900 via-emerald-700 to-teal-500",
     deckSize: { min: 50, max: 50 },
+    openingHandSize: 5,
     description: "Unite your favorite anime fighters",
   },
   {
@@ -90,6 +98,7 @@ export const GAMES: GameConfig[] = [
     color: "#6366F1",
     gradient: "from-indigo-900 via-indigo-700 to-violet-500",
     deckSize: { min: 60, max: 250 },
+    openingHandSize: 7,
     description: "The original trading card game",
   },
   {
@@ -100,6 +109,7 @@ export const GAMES: GameConfig[] = [
     color: "#8B5CF6",
     gradient: "from-purple-900 via-violet-700 to-indigo-500",
     deckSize: { min: 60, max: 60 },
+    openingHandSize: 7,
     description: "Illumineer your way to glory",
   },
   {
@@ -110,6 +120,7 @@ export const GAMES: GameConfig[] = [
     color: "#FFE81F",
     gradient: "from-gray-900 via-yellow-900 to-yellow-600",
     deckSize: { min: 50, max: 50 },
+    openingHandSize: 6,
     description: "May the Force be with you",
   },
   {
@@ -120,6 +131,7 @@ export const GAMES: GameConfig[] = [
     color: "#06B6D4",
     gradient: "from-cyan-900 via-cyan-700 to-blue-500",
     deckSize: { min: 40, max: 40 },
+    openingHandSize: 5,
     description: "Champions battle across the Rift",
   },
 ];
