@@ -12,15 +12,16 @@ import { DeckAnalysisPanel } from "@/components/analysis/DeckAnalysisPanel";
 import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2, TrendingUp, LayoutGrid, List } from "lucide-react";
 import { DeckIOModal } from "./DeckIOModal";
 import { DrawCalcPanel } from "./DrawCalcPanel";
+import { PlaytestPanel } from "./PlaytestPanel";
 import { fetchDeckPrices, getDeckTotalPrice, PRICING_SUPPORTED_GAMES } from "@/lib/card-prices";
 import { checkDeckLegality } from "@/lib/deck-legality";
-import { AlertTriangle, AlertCircle } from "lucide-react";
+import { AlertTriangle, AlertCircle, Swords } from "lucide-react";
 
 interface DeckBuilderProps {
   deck: Deck;
 }
 
-type ActiveTab = "cards" | "search" | "analysis" | "calc";
+type ActiveTab = "cards" | "search" | "analysis" | "calc" | "play";
 
 function buildCostCurve(cards: DeckCard[]): number[] {
   const buckets = [0, 0, 0, 0, 0, 0, 0];
@@ -177,6 +178,7 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
     { id: "cards" as ActiveTab, label: `Deck (${totalCards})`, icon: LayersIcon },
     { id: "analysis" as ActiveTab, label: "Analysis", icon: BarChart3 },
     { id: "calc" as ActiveTab, label: "Odds", icon: TrendingUp },
+    { id: "play" as ActiveTab, label: "Play", icon: Swords },
   ];
 
   return (
@@ -399,6 +401,10 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
           <div className="h-full overflow-y-auto">
             <DrawCalcPanel deck={deck} />
           </div>
+        )}
+
+        {activeTab === "play" && (
+          <PlaytestPanel deck={deck} />
         )}
       </div>
 
