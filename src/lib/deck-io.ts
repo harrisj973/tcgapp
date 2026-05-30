@@ -1,4 +1,4 @@
-import { Deck, DeckCard, TCGGame } from "@/types";
+import { Deck, DeckCard, TCGGame, Card } from "@/types";
 import { getCardsForGame } from "./card-database";
 import { getGame } from "./games";
 
@@ -106,4 +106,51 @@ export function importDeckText(text: string, game: TCGGame): ImportResult {
 
   const cards = Array.from(cardMap.values());
   return { cards, matched: cards.length, unmatched };
+}
+
+// ── Share URL ────────────────────────────────────────────────────────────────
+
+interface SharePayload {
+  g: TCGGame;
+  n: string;
+  l?: string;   // leader card id
+  c: Array<[string, number]>; // [cardId, qty]
+}
+
+export function encodeDeckToUrl(deck: Deck): string {
+  const payload: SharePayload = {
+    g: deck.game,
+    n: deck.name,
+    c: deck.cards.map((dc) => [dc.card.id, dc.quantity]),
+  };
+  if (deck.leader) payload.l = deck.leader.id;
+  const encoded = btoa(JSON.stringify(payload));
+  const base = typeof window !== "undefined" ? window.location.origin + window.location.pathname : "";
+  return `${base}?share=${encodeURIComponent(encoded)}`;
+}
+
+export interface SharedDeckData {
+  game: TCGGame;
+  name: string;
+  cards: DeckCard[];
+  leader?: Card;
+}
+
+export function decodeDeckFromUrl(param: string): SharedDeckData | null {
+  try {
+    const payload: SharePayload = JSON.parse(atob(decodeURIComponent(param)));
+    const allCards = getCardsForGame(payload.g);
+    const byId = new Map(allCards.map((c) => [c.id, c]));
+
+    const cards: DeckCard[] = [];
+    for (const [id, qty] of payload.c) {
+      const card = byId.get(id);
+      if (card) cards.push({ card, quantity: qty });
+    }
+
+    const leader = payload.l ? byId.get(payload.l) : undefined;
+    return { game: payload.g, name: payload.n, cards, leader };
+  } catch {
+    return null;
+  }
 }

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Deck } from "@/types";
-import { exportDeckText, importDeckText } from "@/lib/deck-io";
+import { exportDeckText, importDeckText, encodeDeckToUrl } from "@/lib/deck-io";
 import { useDeckStore } from "@/lib/deck-store";
-import { X, Copy, Check, Upload, Download, AlertTriangle } from "lucide-react";
+import { X, Copy, Check, Upload, Download, AlertTriangle, Link } from "lucide-react";
 
 interface DeckIOModalProps {
   deck: Deck;
@@ -17,6 +17,7 @@ export function DeckIOModal({ deck, onClose }: DeckIOModalProps) {
   const { setDeckCards } = useDeckStore();
   const [tab, setTab] = useState<Tab>("export");
   const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [importText, setImportText] = useState("");
   const [importResult, setImportResult] = useState<{ matched: number; unmatched: string[] } | null>(null);
   const [imported, setImported] = useState(false);
@@ -27,6 +28,13 @@ export function DeckIOModal({ deck, onClose }: DeckIOModalProps) {
     await navigator.clipboard.writeText(exportText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyLink = async () => {
+    const url = encodeDeckToUrl(deck);
+    await navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const handleImport = () => {
@@ -86,17 +94,30 @@ export function DeckIOModal({ deck, onClose }: DeckIOModalProps) {
                   className="w-full glass rounded-xl p-3 text-xs text-white/60 font-mono resize-none focus:outline-none leading-relaxed"
                 />
               </div>
-              <button
-                onClick={handleCopy}
-                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  copied
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                    : "bg-white/10 hover:bg-white/15 text-white border border-white/10"
-                }`}
-              >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                {copied ? "Copied!" : "Copy to Clipboard"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCopy}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    copied
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                      : "bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                  }`}
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? "Copied!" : "Copy Text"}
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    copiedLink
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                      : "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/25"
+                  }`}
+                >
+                  {copiedLink ? <Check className="w-4 h-4" /> : <Link className="w-4 h-4" />}
+                  {copiedLink ? "Copied!" : "Share Link"}
+                </button>
+              </div>
             </>
           )}
 

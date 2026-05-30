@@ -7,17 +7,35 @@ import { GameSelector } from "@/components/GameSelector";
 import { DeckList } from "@/components/deck/DeckList";
 import { DeckBuilder } from "@/components/deck/DeckBuilder";
 import { MetaDashboard } from "@/components/MetaDashboard";
-import { LayersIcon, TrendingUp, ChevronLeft, Sparkles } from "lucide-react";
+import { LayersIcon, TrendingUp, ChevronLeft, Sparkles, Download } from "lucide-react";
+import { decodeDeckFromUrl } from "@/lib/deck-io";
 
 type AppView = "home" | "builder" | "meta";
 
 export default function App() {
-  const { selectedGame, setSelectedGame, setActiveDeck, activeDeckId, decks } = useDeckStore();
+  const { selectedGame, setSelectedGame, setActiveDeck, activeDeckId, decks, createDeck, setDeckCards } = useDeckStore();
   const [view, setView] = useState<AppView>("home");
   const [mounted, setMounted] = useState(false);
+  const [sharedDeckBanner, setSharedDeckBanner] = useState<string | null>(null);
 
   // SSR hydration guard — Zustand reads from localStorage on client only
-  useEffect(() => { setMounted(true); }, []); // eslint-disable-line react-hooks/set-state-in-effect
+  useEffect(() => { // eslint-disable-line react-hooks/set-state-in-effect
+    setMounted(true);
+    const params = new URLSearchParams(window.location.search);
+    const shareParam = params.get("share");
+    if (shareParam) {
+      const data = decodeDeckFromUrl(shareParam);
+      if (data) {
+        const deck = createDeck(data.name, data.game, data.leader);
+        setDeckCards(deck.id, data.cards);
+        setSelectedGame(data.game);
+        setActiveDeck(deck.id);
+        setSharedDeckBanner(data.name);
+        // Clean the URL without reloading
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derive activeDeck from store state; updates whenever decks or activeDeckId change
   const activeDeck: Deck | undefined = useMemo(
@@ -100,6 +118,17 @@ export default function App() {
           </button>
         </div>
       </header>
+
+      {/* Shared deck import banner */}
+      {sharedDeckBanner && (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500/10 border-b border-emerald-500/20">
+          <Download className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <p className="text-xs text-emerald-300 flex-1 truncate">
+            Imported shared deck: <span className="font-semibold">{sharedDeckBanner}</span>
+          </p>
+          <button onClick={() => setSharedDeckBanner(null)} className="text-emerald-400/50 hover:text-emerald-300 transition-colors text-xs">✕</button>
+        </div>
+      )}
 
       {/* Game Selector */}
       {view !== "builder" && (
