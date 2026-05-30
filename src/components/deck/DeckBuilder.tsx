@@ -241,6 +241,7 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
                             card={dc.card}
                             deck={deck}
                             quantity={dc.quantity}
+                            showImage={true}
                             onAdd={handleAddCard}
                             onRemove={handleRemoveCard}
                             compact={true}

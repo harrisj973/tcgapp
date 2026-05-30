@@ -126,6 +126,7 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
               deck={deck}
               onAdd={onAddCard}
               compact={true}
+              showImage={cards.length <= 200}
             />
           ))
         )}

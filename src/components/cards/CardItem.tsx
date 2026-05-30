@@ -2,14 +2,17 @@
 
 import { Card, Deck } from "@/types";
 import { calculateCardSynergy } from "@/lib/synergy-engine";
+import { getCardImageUrl } from "@/lib/card-images";
 import { SynergyBadge } from "@/components/ui/SynergyBadge";
 import { Plus, Minus } from "lucide-react";
+import NextImage from "next/image";
 
 interface CardItemProps {
   card: Card;
   deck?: Deck;
   quantity?: number;
   showSynergy?: boolean;
+  showImage?: boolean;
   onAdd?: (card: Card) => void;
   onRemove?: (card: Card) => void;
   compact?: boolean;
@@ -95,16 +98,36 @@ function RarityBadge({ rarity }: { rarity?: string }) {
   );
 }
 
-export function CardItem({ card, deck, quantity, showSynergy = true, onAdd, onRemove, compact = false }: CardItemProps) {
+export function CardItem({ card, deck, quantity, showSynergy = true, showImage = false, onAdd, onRemove, compact = false }: CardItemProps) {
   const synergy = deck && showSynergy ? calculateCardSynergy(card, deck) : null;
   const borderColor = getColorBorder(card.color);
   const dotColor = getColorDot(card.color);
   const typeIcon = getTypeIcon(card.type);
+  const imageUrl = showImage ? getCardImageUrl(card) : undefined;
 
   if (compact) {
     return (
-      <div className={`flex items-center gap-2 pl-0 pr-3 py-2 rounded-xl glass border-l-4 ${borderColor} overflow-hidden transition-all hover:bg-white/[0.06] ${card.banned ? "opacity-50" : ""}`}>
-        <span className="text-sm pl-2 shrink-0">{typeIcon}</span>
+      <div className={`flex items-center gap-2 pl-0 pr-3 py-1.5 rounded-xl glass border-l-4 ${borderColor} overflow-hidden transition-all hover:bg-white/[0.06] ${card.banned ? "opacity-50" : ""}`}>
+        {/* Thumbnail or type icon */}
+        {imageUrl ? (
+          <div className="relative w-8 h-11 ml-1.5 flex-shrink-0 rounded overflow-hidden bg-white/5">
+            <NextImage
+              src={imageUrl}
+              alt=""
+              fill
+              sizes="32px"
+              className="object-cover object-top"
+              onError={(e) => {
+                const wrap = e.currentTarget.parentElement;
+                if (wrap) {
+                  wrap.innerHTML = `<span class="flex items-center justify-center w-full h-full text-xs">${typeIcon}</span>`;
+                }
+              }}
+            />
+          </div>
+        ) : (
+          <span className="text-sm pl-2 shrink-0">{typeIcon}</span>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">

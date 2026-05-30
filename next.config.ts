@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "cdn.rgpub.io" },
+      { protocol: "https", hostname: "images.ygoprodeck.com" },
+      { protocol: "https", hostname: "images.pokemontcg.io" },
+    ],
+  },
 };
 
 export default nextConfig;
