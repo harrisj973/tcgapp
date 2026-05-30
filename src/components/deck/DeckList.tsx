@@ -155,7 +155,7 @@ export function DeckList({ game, onSelectDeck }: DeckListProps) {
   const toggleFolder = (folder: string) => {
     setCollapsedFolders((prev) => {
       const next = new Set(prev);
-      next.has(folder) ? next.delete(folder) : next.add(folder);
+      if (next.has(folder)) { next.delete(folder); } else { next.add(folder); }
       return next;
     });
   };

@@ -1,6 +1,7 @@
 // Hypergeometric distribution: P(drawing exactly k successes in n draws
 // from a population of N cards containing K successes)
 function hypergeometricPMF(N: number, K: number, n: number, k: number): number {
+  if (N <= 0 || K < 0 || K > N || n < 0 || n > N || k < 0) return 0;
   if (k > K || k > n || n - k > N - K) return 0;
   return (comb(K, k) * comb(N - K, n - k)) / comb(N, n);
 }

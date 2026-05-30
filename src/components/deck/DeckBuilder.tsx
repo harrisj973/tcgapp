@@ -101,7 +101,7 @@ function groupByType(cards: DeckCard[]): Array<{ label: string; cards: DeckCard[
     });
 }
 
-function GridCardTile({ card, onAdd, onRemove }: { card: Card; onAdd: () => void; onRemove: () => void }) {
+function GridCardTile({ card, onRemove }: { card: Card; onAdd?: () => void; onRemove: () => void }) {
   const imageUrl = getCardImageUrl(card);
   return (
     <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-white/5 group cursor-pointer" onClick={onRemove}>

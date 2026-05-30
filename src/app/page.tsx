@@ -18,8 +18,10 @@ export default function App() {
   const [mounted, setMounted] = useState(false);
   const [sharedDeckBanner, setSharedDeckBanner] = useState<string | null>(null);
 
-  // SSR hydration guard — Zustand reads from localStorage on client only
-  useEffect(() => { // eslint-disable-line react-hooks/set-state-in-effect
+  // SSR hydration guard — Zustand reads from localStorage on client only.
+  // setState inside this effect is intentional (one-time mount + share-URL import).
+  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
+  useEffect(() => {
     setMounted(true);
     const params = new URLSearchParams(window.location.search);
     const shareParam = params.get("share");
@@ -31,11 +33,11 @@ export default function App() {
         setSelectedGame(data.game);
         setActiveDeck(deck.id);
         setSharedDeckBanner(data.name);
-        // Clean the URL without reloading
         window.history.replaceState({}, "", window.location.pathname);
       }
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   // Derive activeDeck from store state; updates whenever decks or activeDeckId change
   const activeDeck: Deck | undefined = useMemo(

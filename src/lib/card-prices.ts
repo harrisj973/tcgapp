@@ -20,8 +20,8 @@ async function fetchYGOPrices(deck: Deck): Promise<Map<string, number>> {
         if (!res.ok) return;
         const json = await res.json();
         const raw = json.data?.[0]?.card_prices?.[0]?.tcgplayer_price;
-        const price = raw ? parseFloat(raw) : 0;
-        if (price > 0) {
+        const price = raw !== undefined ? parseFloat(raw) : NaN;
+        if (!isNaN(price)) {
           cache.set(card.id, price);
           results.set(card.id, price);
         }

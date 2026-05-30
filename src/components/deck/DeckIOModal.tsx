@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Deck } from "@/types";
 import { exportDeckText, importDeckText, encodeDeckToUrl } from "@/lib/deck-io";
 import { useDeckStore } from "@/lib/deck-store";
-import { X, Copy, Check, Upload, Download, AlertTriangle, Link, Image } from "lucide-react";
+import { X, Copy, Check, Upload, Download, AlertTriangle, Link, ImageIcon } from "lucide-react";
 import { DecklistExportImage } from "./DecklistExportImage";
 
 interface DeckIOModalProps {
@@ -124,7 +124,7 @@ export function DeckIOModal({ deck, onClose }: DeckIOModalProps) {
                 onClick={() => setShowImageExport(true)}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/25"
               >
-                <Image className="w-4 h-4" />
+                <ImageIcon className="w-4 h-4" />
                 Export as Image
               </button>
             </>
@@ -139,7 +139,7 @@ export function DeckIOModal({ deck, onClose }: DeckIOModalProps) {
                 <span className="text-white/50 font-mono">4x Card Name</span>,{" "}
                 <span className="text-white/50 font-mono">4 Card Name</span>, or{" "}
                 <span className="text-white/50 font-mono">Card Name x4</span>.
-                Lines starting with <span className="text-white/50 font-mono">//</span> are ignored.
+                Lines starting with <span className="text-white/50 font-mono">{"//"}</span> are ignored.
               </p>
               <textarea
                 value={importText}

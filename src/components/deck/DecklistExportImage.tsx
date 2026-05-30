@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Deck } from "@/types";
 import { getGame } from "@/lib/games";
-import { Camera, Download, X } from "lucide-react";
+import { Download, X } from "lucide-react";
 
 interface DecklistExportImageProps {
   deck: Deck;
@@ -27,18 +27,17 @@ export function DecklistExportImage({ deck, onClose }: DecklistExportImageProps)
     if (!ref.current) return;
     setSaving(true);
     try {
-      // Use html2canvas if available, otherwise instruct user to screenshot
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const h2c = (window as any).html2canvas;
-      if (h2c) {
-        const canvas = await h2c(ref.current, { scale: 2, useCORS: true, backgroundColor: "#0a0a1a" });
-        const link = document.createElement("a");
-        link.download = `${deck.name.replace(/[^a-z0-9]/gi, "_")}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      } else {
-        alert("To save: take a screenshot of this panel (the decklist is ready to capture).");
-      }
+      const { default: html2canvas } = await import("html2canvas");
+      const canvas = await html2canvas(ref.current!, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#0a0a1a",
+        logging: false,
+      });
+      const link = document.createElement("a");
+      link.download = `${deck.name.replace(/[^a-z0-9]/gi, "_")}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
     } finally {
       setSaving(false);
     }

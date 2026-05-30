@@ -83,11 +83,11 @@ export function importDeckText(text: string, game: TCGGame): ImportResult {
     const suffixMatch = line.match(/^(.+?)\s+[xX](\d+)$/);
 
     if (prefixMatch) {
-      qty = Math.min(parseInt(prefixMatch[1], 10), 99);
+      qty = Math.min(Math.max(1, parseInt(prefixMatch[1], 10)), 99);
       name = prefixMatch[2].trim();
     } else if (suffixMatch) {
       name = suffixMatch[1].trim();
-      qty = Math.min(parseInt(suffixMatch[2], 10), 99);
+      qty = Math.min(Math.max(1, parseInt(suffixMatch[2], 10)), 99);
     }
 
     const card = byName.get(name.toLowerCase());
@@ -124,7 +124,8 @@ export function encodeDeckToUrl(deck: Deck): string {
     c: deck.cards.map((dc) => [dc.card.id, dc.quantity]),
   };
   if (deck.leader) payload.l = deck.leader.id;
-  const encoded = btoa(JSON.stringify(payload));
+  // encodeURIComponent handles unicode; btoa only accepts Latin-1
+  const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
   const base = typeof window !== "undefined" ? window.location.origin + window.location.pathname : "";
   return `${base}?share=${encodeURIComponent(encoded)}`;
 }
@@ -138,14 +139,22 @@ export interface SharedDeckData {
 
 export function decodeDeckFromUrl(param: string): SharedDeckData | null {
   try {
-    const payload: SharePayload = JSON.parse(atob(decodeURIComponent(param)));
+    // Reverse the unicode-safe encoding applied in encodeDeckToUrl
+    const payload: SharePayload = JSON.parse(decodeURIComponent(atob(decodeURIComponent(param))));
     const allCards = getCardsForGame(payload.g);
     const byId = new Map(allCards.map((c) => [c.id, c]));
 
+    const unresolved: string[] = [];
     const cards: DeckCard[] = [];
     for (const [id, qty] of payload.c) {
+      if (qty <= 0) continue;
       const card = byId.get(id);
       if (card) cards.push({ card, quantity: qty });
+      else unresolved.push(id);
+    }
+
+    if (unresolved.length > 0) {
+      console.warn(`[decodeDeckFromUrl] ${unresolved.length} card ID(s) not found in database:`, unresolved);
     }
 
     const leader = payload.l ? byId.get(payload.l) : undefined;

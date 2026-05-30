@@ -27,47 +27,46 @@ export function checkDeckLegality(deck: Deck): LegalityIssue[] {
   }
 
   for (const { card, quantity } of deck.cards) {
-    // Banned card in deck
+    // Banned card — single consolidated message
     if (card.banned) {
       issues.push({
         severity: "error",
-        message: `${card.name} is banned`,
+        message: card.game === "yugioh" && quantity > 0
+          ? `${card.name} is banned (remove all copies)`
+          : `${card.name} is banned`,
         cardId: card.id,
         cardName: card.name,
       });
+      continue; // skip copy-limit checks — banned cards can't legally be present at all
     }
 
-    // Copy-limit violations
+    // Copy-limit violations (non-banned cards only)
     const max =
       deck.game === "yugioh"
-        ? card.banned ? 0 : card.limited ? 1 : card.semiLimited ? 2 : 3
+        ? card.limited ? 1 : card.semiLimited ? 2 : 3
         : deck.game === "pokemon" || deck.game === "mtg" || deck.game === "lorcana" ||
           deck.game === "digimon" || deck.game === "unionarena"
         ? 4
         : 3;
 
-    if (quantity > max && max > 0) {
-      issues.push({
-        severity: "error",
-        message: `${card.name}: ${quantity} copies (max ${max})`,
-        cardId: card.id,
-        cardName: card.name,
-      });
-    }
-
     if (card.limited && quantity > 1) {
       issues.push({
         severity: "error",
-        message: `${card.name} is limited to 1 copy`,
+        message: `${card.name} is limited to 1 copy (has ${quantity})`,
         cardId: card.id,
         cardName: card.name,
       });
-    }
-
-    if (card.semiLimited && quantity > 2) {
+    } else if (card.semiLimited && quantity > 2) {
       issues.push({
         severity: "error",
-        message: `${card.name} is semi-limited to 2 copies`,
+        message: `${card.name} is semi-limited to 2 copies (has ${quantity})`,
+        cardId: card.id,
+        cardName: card.name,
+      });
+    } else if (quantity > max) {
+      issues.push({
+        severity: "error",
+        message: `${card.name}: ${quantity} copies (max ${max})`,
         cardId: card.id,
         cardName: card.name,
       });
