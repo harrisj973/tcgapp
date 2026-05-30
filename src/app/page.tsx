@@ -7,7 +7,7 @@ import { GameSelector } from "@/components/GameSelector";
 import { DeckList } from "@/components/deck/DeckList";
 import { DeckBuilder } from "@/components/deck/DeckBuilder";
 import { MetaDashboard } from "@/components/MetaDashboard";
-import { LayersIcon, TrendingUp, ChevronLeft } from "lucide-react";
+import { LayersIcon, TrendingUp, ChevronLeft, Sparkles } from "lucide-react";
 
 type AppView = "home" | "builder" | "meta";
 
@@ -17,14 +17,9 @@ export default function App() {
   const [activeDeck, setLocalActiveDeck] = useState<Deck | undefined>(undefined);
   const [mounted, setMounted] = useState(false);
 
+  useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      setLocalActiveDeck(getActiveDeck());
-    }
+    if (mounted) setLocalActiveDeck(getActiveDeck());
   }, [decks, mounted]);
 
   const handleSelectDeck = (deck: Deck) => {
@@ -40,48 +35,51 @@ export default function App() {
 
   if (!mounted) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#0f1117]">
+      <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <div className="text-4xl mb-3">🃏</div>
-          <div className="animate-pulse text-gray-400 text-sm">Loading TCG Builder...</div>
+          <div className="text-5xl mb-4">🃏</div>
+          <div className="animate-pulse text-white/40 text-sm tracking-widest uppercase">Loading</div>
         </div>
       </div>
     );
   }
 
+  const isHome = view === "home" || view === "builder";
+
   return (
-    <div className="flex flex-col h-full bg-[#0f1117] max-w-md mx-auto relative">
+    <div className="flex flex-col h-full max-w-md mx-auto relative">
       {/* Top Navigation Bar */}
-      <header className="flex-shrink-0 flex items-center gap-3 px-4 py-3 bg-gray-900/95 border-b border-gray-700/50 backdrop-blur-sm z-10">
+      <header className="flex-shrink-0 flex items-center gap-3 px-4 py-3 glass-nav border-b z-10">
         {view === "builder" ? (
           <button
             onClick={() => setView("home")}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
+            className="p-1.5 rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-all"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
         ) : null}
 
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-            <span className="text-base">🃏</span>
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          {/* Logo mark */}
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-violet-500/30">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-black text-white tracking-tight leading-none">TCG Builder</h1>
-            <p className="text-[10px] text-gray-500 leading-none mt-0.5 truncate">
+            <p className="text-[10px] text-white/35 leading-none mt-0.5 truncate">
               {view === "builder" && activeDeck ? activeDeck.name : "AI-Powered Deck Assistant"}
             </p>
           </div>
         </div>
 
-        {/* Nav Tabs */}
-        <div className="flex items-center gap-1 bg-gray-800/80 rounded-xl p-1 border border-gray-700/30">
+        {/* Nav pill */}
+        <div className="flex items-center gap-0.5 glass rounded-xl p-1">
           <button
             onClick={() => setView("home")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              view === "home" || view === "builder"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-gray-400 hover:text-white"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              isHome
+                ? "bg-white/15 text-white shadow-sm"
+                : "text-white/40 hover:text-white/70"
             }`}
           >
             <LayersIcon className="w-3.5 h-3.5" />
@@ -89,10 +87,10 @@ export default function App() {
           </button>
           <button
             onClick={() => setView("meta")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               view === "meta"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-gray-400 hover:text-white"
+                ? "bg-white/15 text-white shadow-sm"
+                : "text-white/40 hover:text-white/70"
             }`}
           >
             <TrendingUp className="w-3.5 h-3.5" />
@@ -101,7 +99,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Game Selector — shown on home and meta views */}
+      {/* Game Selector */}
       {view !== "builder" && (
         <GameSelector selected={selectedGame} onSelect={handleGameSelect} />
       )}
@@ -111,48 +109,52 @@ export default function App() {
         {view === "home" && (
           <DeckList game={selectedGame} onSelectDeck={handleSelectDeck} />
         )}
-
         {view === "builder" && activeDeck && (
           <DeckBuilder deck={activeDeck} />
         )}
-
         {view === "builder" && !activeDeck && (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <LayersIcon className="w-12 h-12 text-gray-600 mb-4" />
-            <p className="text-gray-400 font-medium">No deck selected</p>
+            <LayersIcon className="w-12 h-12 text-white/20 mb-4" />
+            <p className="text-white/50 font-medium">No deck selected</p>
             <button
               onClick={() => setView("home")}
-              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm text-white transition-colors"
+              className="mt-4 px-4 py-2 glass-md rounded-xl text-sm text-white/70 hover:text-white transition-colors"
             >
               Go to Decks
             </button>
           </div>
         )}
-
-        {view === "meta" && (
-          <MetaDashboard game={selectedGame} />
-        )}
+        {view === "meta" && <MetaDashboard game={selectedGame} />}
       </main>
 
       {/* Bottom Tab Bar */}
-      <nav className="flex-shrink-0 flex border-t border-gray-700/50 bg-gray-900/95 backdrop-blur-sm pb-safe">
+      <nav className="flex-shrink-0 flex glass-nav border-t pb-safe">
         <button
           onClick={() => setView("home")}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
-            view === "home" || view === "builder" ? "text-blue-400" : "text-gray-500 hover:text-gray-300"
+          className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-semibold transition-all ${
+            isHome ? "text-blue-400" : "text-white/30 hover:text-white/50"
           }`}
         >
-          <LayersIcon className="w-5 h-5" />
+          <div className="relative">
+            <LayersIcon className="w-5 h-5" />
+            {isHome && (
+              <span className="glow-dot absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-400" />
+            )}
+          </div>
           <span>Decks</span>
         </button>
-
         <button
           onClick={() => setView("meta")}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
-            view === "meta" ? "text-blue-400" : "text-gray-500 hover:text-gray-300"
+          className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-semibold transition-all ${
+            view === "meta" ? "text-violet-400" : "text-white/30 hover:text-white/50"
           }`}
         >
-          <TrendingUp className="w-5 h-5" />
+          <div className="relative">
+            <TrendingUp className="w-5 h-5" />
+            {view === "meta" && (
+              <span className="glow-dot absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-violet-400" />
+            )}
+          </div>
           <span>Meta</span>
         </button>
       </nav>

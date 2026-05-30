@@ -15,7 +15,6 @@ interface CardSearchProps {
 export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
   const [filters, setFilters] = useState<SearchFilters>({ query: "" });
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   const types = useMemo(() => getCardTypes(game), [game]);
   const colors = useMemo(() => getCardColors(game), [game]);
@@ -28,23 +27,25 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
     setFilters((prev) => ({ ...prev, [key]: value || undefined }));
   };
 
+  const hasActiveFilters = filters.type || filters.color || filters.banned === false;
+
   return (
     <div className="flex flex-col h-full">
       {/* Search Bar */}
-      <div className="p-4 border-b border-gray-700/50">
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <div className="p-3 border-b border-white/[0.05] space-y-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
           <input
             type="text"
             value={filters.query}
             onChange={(e) => updateFilter("query", e.target.value)}
-            placeholder="Search cards by name, effect, tag..."
-            className="w-full pl-10 pr-10 py-2.5 bg-gray-800 border border-gray-600 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Search by name, effect, keyword..."
+            className="w-full pl-9 pr-9 py-2.5 glass rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 transition-colors"
           />
           {filters.query && (
             <button
               onClick={() => updateFilter("query", "")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/60 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -54,43 +55,48 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              showFilters ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+              showFilters || hasActiveFilters
+                ? "bg-white/15 text-white border-white/20"
+                : "glass text-white/40 hover:text-white/70 border-white/[0.07]"
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
             Filters
+            {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showFilters ? "rotate-180" : ""}`} />
           </button>
-          <span className="text-xs text-gray-500 ml-auto">{cards.length} cards</span>
+          <span className="text-[11px] text-white/25 ml-auto tabular-nums">{cards.length.toLocaleString()} cards</span>
         </div>
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Type</label>
-              <select
-                value={filters.type || ""}
-                onChange={(e) => updateFilter("type", e.target.value)}
-                className="w-full px-2 py-1.5 bg-gray-800 border border-gray-600 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
-              >
-                <option value="">All Types</option>
-                {types.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
+          <div className="glass rounded-xl p-3 space-y-2.5">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Type</label>
+                <select
+                  value={filters.type || ""}
+                  onChange={(e) => updateFilter("type", e.target.value)}
+                  className="w-full px-2.5 py-1.5 glass rounded-lg text-xs text-white focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="">All Types</option>
+                  {types.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Color</label>
+                <select
+                  value={filters.color || ""}
+                  onChange={(e) => updateFilter("color", e.target.value)}
+                  className="w-full px-2.5 py-1.5 glass rounded-lg text-xs text-white focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="">All Colors</option>
+                  {colors.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Color</label>
-              <select
-                value={filters.color || ""}
-                onChange={(e) => updateFilter("color", e.target.value)}
-                className="w-full px-2 py-1.5 bg-gray-800 border border-gray-600 rounded-lg text-xs text-white focus:outline-none focus:border-blue-500"
-              >
-                <option value="">All Colors</option>
-                {colors.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div className="col-span-2 flex items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 id="hideBanned"
@@ -98,19 +104,19 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
                 onChange={(e) => updateFilter("banned", e.target.checked ? false : undefined)}
                 className="rounded"
               />
-              <label htmlFor="hideBanned" className="text-xs text-gray-400 cursor-pointer">Hide Banned Cards</label>
-            </div>
+              <span className="text-xs text-white/40">Hide Banned Cards</span>
+            </label>
           </div>
         )}
       </div>
 
       {/* Card List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
         {cards.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <Search className="w-8 h-8 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">No cards found</p>
-            <p className="text-xs mt-1">Try adjusting your search or filters</p>
+          <div className="text-center py-16">
+            <Search className="w-8 h-8 mx-auto mb-3 text-white/15" />
+            <p className="text-sm text-white/40 font-medium">No cards found</p>
+            <p className="text-xs text-white/20 mt-1">Try adjusting your search or filters</p>
           </div>
         ) : (
           cards.map((card) => (

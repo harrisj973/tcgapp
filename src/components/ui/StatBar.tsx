@@ -24,12 +24,12 @@ export function StatBar({ label, value, max = 100, color, showValue = true, size
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-1">
-        <span className="text-xs text-gray-400 font-medium">{label}</span>
+        <span className="text-xs text-white/35 font-medium">{label}</span>
         {showValue && (
-          <span className="text-xs font-bold text-white">{value}%</span>
+          <span className="text-xs font-bold text-white/70">{value}%</span>
         )}
       </div>
-      <div className={`w-full ${height} bg-gray-700/50 rounded-full overflow-hidden`}>
+      <div className={`w-full ${height} bg-white/[0.07] rounded-full overflow-hidden`}>
         <div
           className={`${height} rounded-full bg-gradient-to-r ${barColor} transition-all duration-700 ease-out`}
           style={{ width: `${pct}%` }}
