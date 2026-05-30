@@ -7,8 +7,9 @@ import { getGame } from "@/lib/games";
 import { CardSearch } from "@/components/cards/CardSearch";
 import { CardItem } from "@/components/cards/CardItem";
 import { DeckAnalysisPanel } from "@/components/analysis/DeckAnalysisPanel";
-import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight } from "lucide-react";
+import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2 } from "lucide-react";
 import { DeckIOModal } from "./DeckIOModal";
+import { fetchDeckPrices, getDeckTotalPrice, PRICING_SUPPORTED_GAMES } from "@/lib/card-prices";
 
 interface DeckBuilderProps {
   deck: Deck;
@@ -100,6 +101,21 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(deck.name);
   const [showIO, setShowIO] = useState(false);
+  const [priceMap, setPriceMap] = useState<Map<string, number>>(new Map());
+  const [priceFetching, setPriceFetching] = useState(false);
+  const [priceFetched, setPriceFetched] = useState(false);
+
+  const priceSupported = PRICING_SUPPORTED_GAMES.includes(deck.game);
+  const deckTotal = getDeckTotalPrice(priceMap, deck);
+
+  const handleFetchPrices = async () => {
+    if (priceFetching || deck.cards.length === 0) return;
+    setPriceFetching(true);
+    const map = await fetchDeckPrices(deck);
+    setPriceMap(map);
+    setPriceFetched(true);
+    setPriceFetching(false);
+  };
 
   const game = getGame(deck.game);
   const totalCards = getDeckCardCount(deck);
@@ -163,6 +179,18 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
                 </div>
                 <p className="text-[10px] text-white/30">{game.name}</p>
               </div>
+              {priceSupported && (
+                <button
+                  onClick={handleFetchPrices}
+                  disabled={priceFetching}
+                  className={`p-2 rounded-xl glass hover:bg-white/10 transition-all flex-shrink-0 ${priceFetched ? "text-emerald-400" : "text-white/30 hover:text-white/70"}`}
+                  title="Fetch card prices"
+                >
+                  {priceFetching
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : <DollarSign className="w-3.5 h-3.5" />}
+                </button>
+              )}
               <button
                 onClick={() => setShowIO(true)}
                 className="p-2 rounded-xl glass hover:bg-white/10 text-white/30 hover:text-white/70 transition-all flex-shrink-0"
@@ -181,11 +209,16 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
           </div>
           <div className="flex items-center justify-between">
             <TypeBreakdown cards={deck.cards} />
-            <span className={`text-[10px] font-semibold shrink-0 ml-2 ${isOver ? "text-red-400" : isLegal ? "text-emerald-400" : "text-white/30"}`}>
-              {totalCards}/{game.deckSize.max}
-              {isLegal && " ✓"}
-              {isOver && " ↑"}
-            </span>
+            <div className="flex items-center gap-2 shrink-0 ml-2">
+              {priceFetched && deckTotal > 0 && (
+                <span className="text-[10px] font-semibold text-emerald-400">${deckTotal.toFixed(2)}</span>
+              )}
+              <span className={`text-[10px] font-semibold ${isOver ? "text-red-400" : isLegal ? "text-emerald-400" : "text-white/30"}`}>
+                {totalCards}/{game.deckSize.max}
+                {isLegal && " ✓"}
+                {isOver && " ↑"}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -251,6 +284,7 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
                             deck={deck}
                             quantity={dc.quantity}
                             showImage={true}
+                            price={priceMap.get(dc.card.id)}
                             onAdd={handleAddCard}
                             onRemove={handleRemoveCard}
                             compact={true}

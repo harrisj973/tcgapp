@@ -13,6 +13,7 @@ interface CardItemProps {
   quantity?: number;
   showSynergy?: boolean;
   showImage?: boolean;
+  price?: number;
   onAdd?: (card: Card) => void;
   onRemove?: (card: Card) => void;
   compact?: boolean;
@@ -98,7 +99,7 @@ function RarityBadge({ rarity }: { rarity?: string }) {
   );
 }
 
-export function CardItem({ card, deck, quantity, showSynergy = true, showImage = false, onAdd, onRemove, compact = false }: CardItemProps) {
+export function CardItem({ card, deck, quantity, showSynergy = true, showImage = false, price, onAdd, onRemove, compact = false }: CardItemProps) {
   const synergy = deck && showSynergy ? calculateCardSynergy(card, deck) : null;
   const borderColor = getColorBorder(card.color);
   const dotColor = getColorDot(card.color);
@@ -145,6 +146,9 @@ export function CardItem({ card, deck, quantity, showSynergy = true, showImage =
         </div>
 
         {synergy && <SynergyBadge color={synergy.color} size="sm" />}
+        {price !== undefined && (
+          <span className="text-[10px] font-semibold text-emerald-400/80 shrink-0">${price.toFixed(2)}</span>
+        )}
 
         {quantity !== undefined && (
           <div className="flex items-center gap-1 shrink-0">
