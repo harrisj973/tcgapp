@@ -13,6 +13,8 @@ import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarS
 import { DeckIOModal } from "./DeckIOModal";
 import { DrawCalcPanel } from "./DrawCalcPanel";
 import { fetchDeckPrices, getDeckTotalPrice, PRICING_SUPPORTED_GAMES } from "@/lib/card-prices";
+import { checkDeckLegality } from "@/lib/deck-legality";
+import { AlertTriangle, AlertCircle } from "lucide-react";
 
 interface DeckBuilderProps {
   deck: Deck;
@@ -157,6 +159,12 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
   const handleAddCard = (card: Card) => addCard(deck.id, card);
   const handleRemoveCard = (card: Card) => removeCard(deck.id, card.id);
 
+  const legalityIssues = useMemo(() => checkDeckLegality(deck), [deck.cards, deck.game]); // eslint-disable-line react-hooks/exhaustive-deps
+  const illegalCardIds = useMemo(
+    () => new Set(legalityIssues.filter((i) => i.cardId).map((i) => i.cardId!)),
+    [legalityIssues]
+  );
+
   const handleSaveName = () => {
     if (nameInput.trim()) renameDeck(deck.id, nameInput.trim());
     setIsEditingName(false);
@@ -296,6 +304,24 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
               </div>
             ) : (
               <div className="p-3 space-y-3">
+                {/* Legality issues */}
+                {legalityIssues.length > 0 && (
+                  <div className="glass rounded-xl overflow-hidden">
+                    {legalityIssues.map((issue, i) => (
+                      <div key={i} className={`flex items-start gap-2 px-3 py-2 text-xs border-b last:border-b-0 ${
+                        issue.severity === "error"
+                          ? "border-red-500/10 bg-red-500/5 text-red-400"
+                          : "border-amber-500/10 bg-amber-500/5 text-amber-400"
+                      }`}>
+                        {issue.severity === "error"
+                          ? <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                          : <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />}
+                        <span>{issue.message}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {/* View toggle */}
                 <div className="flex items-center justify-between">
                   <CostCurve cards={deck.cards} />
@@ -342,17 +368,18 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
                         </div>
                         <div className="space-y-1.5">
                           {cards.map((dc) => (
-                            <CardItem
-                              key={dc.card.id}
-                              card={dc.card}
-                              deck={deck}
-                              quantity={dc.quantity}
-                              showImage={true}
-                              price={priceMap.get(dc.card.id)}
-                              onAdd={handleAddCard}
-                              onRemove={handleRemoveCard}
-                              compact={true}
-                            />
+                            <div key={dc.card.id} className={illegalCardIds.has(dc.card.id) ? "ring-1 ring-red-500/50 rounded-xl" : ""}>
+                              <CardItem
+                                card={dc.card}
+                                deck={deck}
+                                quantity={dc.quantity}
+                                showImage={true}
+                                price={priceMap.get(dc.card.id)}
+                                onAdd={handleAddCard}
+                                onRemove={handleRemoveCard}
+                                compact={true}
+                              />
+                            </div>
                           ))}
                         </div>
                       </div>
