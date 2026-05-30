@@ -82,6 +82,8 @@ export interface Deck {
   archetype?: string;
   winRate?: number;
   metaTier?: "S" | "A" | "B" | "C" | "D";
+  folder?: string;
+  colorTag?: string;
   createdAt: Date;
   updatedAt: Date;
 }
