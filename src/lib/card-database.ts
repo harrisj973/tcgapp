@@ -7,6 +7,7 @@ import { SWU_CARDS } from "./swu-cards";
 import { DIGIMON_CARDS } from "./digimon-cards";
 import { UA_CARDS } from "./ua-cards";
 import { YUGIOH_CARDS } from "./yugioh-cards";
+import { MTG_CARDS } from "./mtg-cards";
 
 // Real ban list card numbers (from official OPTCG ban list, effective 2026-04-10)
 const OPCG_BANNED_IDS = new Set([
@@ -21,17 +22,6 @@ const ONEPIECE_CARDS_WITH_BANS: Card[] = ONEPIECE_CARDS.map((c) =>
 
 
 
-const MTG_CARDS: Card[] = [
-  { id: "mtg-1", name: "Lightning Bolt", game: "mtg", type: "Instant", manaCost: "R", cmc: 1, colors: ["Red"], rarity: "Common", description: "Lightning Bolt deals 3 damage to any target.", tags: ["removal", "burn", "staple"] },
-  { id: "mtg-2", name: "Counterspell", game: "mtg", type: "Instant", manaCost: "UU", cmc: 2, colors: ["Blue"], rarity: "Common", description: "Counter target spell.", tags: ["counter", "staple"] },
-  { id: "mtg-3", name: "Black Lotus", game: "mtg", type: "Artifact", manaCost: "0", cmc: 0, colors: [], rarity: "Mythic Rare", banned: true, description: "Tap, Sacrifice Black Lotus: Add three mana of any one color.", tags: ["power9", "banned"] },
-  { id: "mtg-4", name: "Thoughtseize", game: "mtg", type: "Sorcery", manaCost: "B", cmc: 1, colors: ["Black"], rarity: "Rare", description: "Target player reveals their hand. You choose a nonland, nontoken card from it. That player discards that card. You lose 2 life.", tags: ["discard", "hand-disruption", "staple"] },
-  { id: "mtg-5", name: "Snapcaster Mage", game: "mtg", type: "Creature", subtype: "Human Wizard", manaCost: "1U", cmc: 2, colors: ["Blue"], power: 2, rarity: "Mythic Rare", description: "Flash. When Snapcaster Mage enters, target instant or sorcery card in your graveyard gains flashback until end of turn.", tags: ["value", "flash", "staple"] },
-  { id: "mtg-6", name: "Wrenn and Six", game: "mtg", type: "Planeswalker", manaCost: "RG", cmc: 2, colors: ["Red", "Green"], rarity: "Mythic Rare", description: "+1: Return target land card from your graveyard to your hand. -1: Wrenn and Six deals 1 damage to any target. -7: You get an emblem with 'Instant and sorcery cards in your graveyard have retrace.'", tags: ["planeswalker", "staple"] },
-  { id: "mtg-7", name: "Ragavan, Nimble Pilferer", game: "mtg", type: "Creature", subtype: "Monkey Pirate", manaCost: "R", cmc: 1, colors: ["Red"], power: 2, rarity: "Mythic Rare", description: "Dash 1R. Whenever Ragavan, Nimble Pilferer deals combat damage to a player, create a Treasure token and exile the top card of that player's library. Until end of turn, you may cast that card.", tags: ["aggro", "tempo", "staple"] },
-  { id: "mtg-8", name: "Force of Will", game: "mtg", type: "Instant", manaCost: "3UU", cmc: 5, colors: ["Blue"], rarity: "Uncommon", description: "You may pay 1 life and exile a blue card from your hand rather than pay this spell's mana cost. Counter target spell.", tags: ["counter", "staple", "free"] },
-  { id: "mtg-9", name: "Tarmogoyf", game: "mtg", type: "Creature", subtype: "Lhurgoyf", manaCost: "1G", cmc: 2, colors: ["Green"], rarity: "Mythic Rare", description: "Tarmogoyf's power is equal to the number of card types among cards in all graveyards and its toughness is equal to that number plus 1.", tags: ["beater", "staple"] },
-];
 
 const DBS_CARDS: Card[] = [
   { id: "dbs-1", name: "Son Goku, The Awakened Power", game: "dbs", type: "Leader", color: "Red/Yellow", power: 15000, rarity: "Leader", description: "Awaken: When you have 4 or less life, flip this card over. Skills: [Sparking] your Red/Yellow cards are [Permanent].", tags: ["leader", "red", "yellow", "awakened"] },
