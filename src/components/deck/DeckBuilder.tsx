@@ -7,7 +7,8 @@ import { getGame } from "@/lib/games";
 import { CardSearch } from "@/components/cards/CardSearch";
 import { CardItem } from "@/components/cards/CardItem";
 import { DeckAnalysisPanel } from "@/components/analysis/DeckAnalysisPanel";
-import { LayersIcon, Search, BarChart3, Edit3, Check, X } from "lucide-react";
+import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight } from "lucide-react";
+import { DeckIOModal } from "./DeckIOModal";
 
 interface DeckBuilderProps {
   deck: Deck;
@@ -98,6 +99,7 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>("search");
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(deck.name);
+  const [showIO, setShowIO] = useState(false);
 
   const game = getGame(deck.game);
   const totalCards = getDeckCardCount(deck);
@@ -161,6 +163,13 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
                 </div>
                 <p className="text-[10px] text-white/30">{game.name}</p>
               </div>
+              <button
+                onClick={() => setShowIO(true)}
+                className="p-2 rounded-xl glass hover:bg-white/10 text-white/30 hover:text-white/70 transition-all flex-shrink-0"
+                title="Import / Export"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
         </div>
@@ -260,6 +269,8 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
           <DeckAnalysisPanel deck={deck} />
         )}
       </div>
+
+      {showIO && <DeckIOModal deck={deck} onClose={() => setShowIO(false)} />}
     </div>
   );
 }
