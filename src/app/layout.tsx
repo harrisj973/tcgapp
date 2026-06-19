@@ -11,6 +11,18 @@ export const metadata: Metadata = {
   title: "TCG Deck Builder — AI-Powered Deck Assistant",
   description: "Build competitive decks for Yu-Gi-Oh!, One Piece, Digimon, Pokémon, Magic and more with AI-powered analysis",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "TCG Builder",
+  },
+  icons: {
+    apple: "/icon-192.png",
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
