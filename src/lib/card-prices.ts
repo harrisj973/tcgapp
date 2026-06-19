@@ -82,13 +82,82 @@ async function fetchMTGPrices(deck: Deck): Promise<Map<string, number>> {
   return results;
 }
 
+// ── Pokémon TCG (pokemontcg.io — free, open CORS, no key required) ───────
+
+// Convert our card ID to pokemontcg.io format: "poke-sv5_001" → "sv5-1"
+function pokeCardToApiId(cardId: string): string {
+  const code = cardId.slice(5); // strip "poke-"
+  const ul = code.lastIndexOf("_");
+  if (ul === -1) return code;
+  const setId = code.slice(0, ul);
+  const num = parseInt(code.slice(ul + 1), 10);
+  return `${setId}-${num}`;
+}
+
+function pickPokePrice(prices: Record<string, { market?: number | null }>): number {
+  const priority = ["normal", "holofoil", "reverseHolofoil", "1stEditionHolofoil", "1stEditionNormal"];
+  for (const key of priority) {
+    const market = prices[key]?.market;
+    if (typeof market === "number" && !isNaN(market)) return market;
+  }
+  return NaN;
+}
+
+async function fetchPokemonPrices(deck: Deck): Promise<Map<string, number>> {
+  const results = new Map<string, number>();
+  const toFetch = deck.cards.filter((dc) => !cache.has(dc.card.id));
+
+  // Build a lookup from pokemontcg.io ID → our card ID
+  const apiIdToCardId = new Map<string, string>();
+  for (const { card } of toFetch) {
+    apiIdToCardId.set(pokeCardToApiId(card.id), card.id);
+  }
+
+  // Batch 20 cards per request (safe URL length)
+  const apiIds = Array.from(apiIdToCardId.keys());
+  const chunks: string[][] = [];
+  for (let i = 0; i < apiIds.length; i += 20) {
+    chunks.push(apiIds.slice(i, i + 20));
+  }
+
+  await Promise.allSettled(
+    chunks.map(async (chunk) => {
+      try {
+        const q = chunk.map((id) => `id:${id}`).join(" OR ");
+        const res = await fetch(
+          `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&pageSize=20&select=id,tcgplayer`,
+          { signal: AbortSignal.timeout(8000) }
+        );
+        if (!res.ok) return;
+        const json = await res.json();
+        for (const card of json.data ?? []) {
+          const cardId = apiIdToCardId.get(card.id);
+          if (!cardId) continue;
+          const price = pickPokePrice(card.tcgplayer?.prices ?? {});
+          if (!isNaN(price)) {
+            cache.set(cardId, price);
+            results.set(cardId, price);
+          }
+        }
+      } catch { /* silently skip */ }
+    })
+  );
+
+  for (const { card } of deck.cards) {
+    const p = cache.get(card.id);
+    if (p !== undefined) results.set(card.id, p);
+  }
+  return results;
+}
+
 // ── Public entry point ─────────────────────────────────────────────────────
 
-export const PRICING_SUPPORTED_GAMES: TCGGame[] = ["yugioh", "mtg"];
+export const PRICING_SUPPORTED_GAMES: TCGGame[] = ["yugioh", "mtg", "pokemon"];
 
 export async function fetchDeckPrices(deck: Deck): Promise<Map<string, number>> {
   if (deck.game === "yugioh") return fetchYGOPrices(deck);
   if (deck.game === "mtg") return fetchMTGPrices(deck);
+  if (deck.game === "pokemon") return fetchPokemonPrices(deck);
   return new Map();
 }
 
