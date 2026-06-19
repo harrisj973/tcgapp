@@ -143,6 +143,11 @@ async function fetchPokemonPrices(deck: Deck): Promise<Map<string, number>> {
     })
   );
 
+  // Cache 0 for cards the API didn't return so they aren't re-fetched on every button press
+  for (const cardId of apiIdToCardId.values()) {
+    if (!cache.has(cardId)) cache.set(cardId, 0);
+  }
+
   for (const { card } of deck.cards) {
     const p = cache.get(card.id);
     if (p !== undefined) results.set(card.id, p);

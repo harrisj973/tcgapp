@@ -143,7 +143,7 @@ export default function App() {
           <DeckList game={selectedGame} onSelectDeck={handleSelectDeck} />
         )}
         {view === "builder" && activeDeck && (
-          <DeckBuilder deck={activeDeck} />
+          <DeckBuilder key={activeDeck.id} deck={activeDeck} />
         )}
         {view === "builder" && !activeDeck && (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">

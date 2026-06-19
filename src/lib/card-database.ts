@@ -93,7 +93,8 @@ export function searchCards(game: TCGGame, filters: SearchFilters): Card[] {
   if (filters.maxCost !== undefined) {
     cards = cards.filter((c) => {
       const cost = typeof c.cost === "number" ? c.cost : (c.cmc ?? c.level);
-      return cost !== undefined && cost <= filters.maxCost!;
+      // Cards with no cost/level field (e.g. YGO Spells/Traps) are not excluded by this filter
+      return cost === undefined || cost <= filters.maxCost!;
     });
   }
 

@@ -21,7 +21,7 @@ function getColorBorder(color?: string): string {
   if (c.includes("yellow") || c.includes("lightning") || c.includes("electric") || c.includes("cunning") || c.includes("amber")) return "from-yellow-900/60";
   if (c.includes("purple") || c.includes("amethyst") || c.includes("psychic") || c.includes("villainy")) return "from-purple-900/60";
   if (c.includes("white") || c.includes("heroism")) return "from-slate-700/60";
-  if (c.includes("black") || c.includes("shadow") || c.includes("dark")) return "from-gray-900/80";
+  if (c.includes("black") || c.includes("shadow") || c.includes("dark")) return "from-black/80";
   return "from-slate-900/60";
 }
 
