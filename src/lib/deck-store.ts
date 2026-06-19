@@ -19,6 +19,7 @@ interface DeckStore {
   setDeckCards: (id: string, cards: DeckCard[]) => void;
   setDeckMeta: (id: string, meta: { folder?: string; colorTag?: string }) => void;
   setDeckLeader: (id: string, leader: Card | undefined) => void;
+  setDeckNotes: (id: string, notes: string) => void;
   getActiveDeck: () => Deck | undefined;
   getDeckCardCount: (deck: Deck) => number;
 }
@@ -197,6 +198,13 @@ export const useDeckStore = create<DeckStore>()(
         set((state) => ({
           decks: state.decks.map((d) =>
             d.id === id ? { ...d, leader, updatedAt: new Date() } : d
+          ),
+        })),
+
+      setDeckNotes: (id, notes) =>
+        set((state) => ({
+          decks: state.decks.map((d) =>
+            d.id === id ? { ...d, notes, updatedAt: new Date() } : d
           ),
         })),
 

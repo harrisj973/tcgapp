@@ -84,6 +84,7 @@ export interface Deck {
   metaTier?: "S" | "A" | "B" | "C" | "D";
   folder?: string;
   colorTag?: string;
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }

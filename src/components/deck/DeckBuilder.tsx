@@ -10,7 +10,7 @@ import { CardSearch } from "@/components/cards/CardSearch";
 import { CardItem } from "@/components/cards/CardItem";
 import { DeckAnalysisPanel } from "@/components/analysis/DeckAnalysisPanel";
 import { CardDetailModal } from "@/components/cards/CardDetailModal";
-import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2, TrendingUp, LayoutGrid, List } from "lucide-react";
+import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2, TrendingUp, LayoutGrid, List, NotebookPen } from "lucide-react";
 import { DeckIOModal } from "./DeckIOModal";
 import { DrawCalcPanel } from "./DrawCalcPanel";
 import { PlaytestPanel } from "./PlaytestPanel";
@@ -130,7 +130,7 @@ function GridCardTile({ card, onRemove }: { card: Card; onAdd?: () => void; onRe
 }
 
 export function DeckBuilder({ deck }: DeckBuilderProps) {
-  const { addCard, removeCard, renameDeck, getDeckCardCount, setDeckLeader } = useDeckStore();
+  const { addCard, removeCard, renameDeck, getDeckCardCount, setDeckLeader, setDeckNotes } = useDeckStore();
   const [activeTab, setActiveTab] = useState<ActiveTab>("search");
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(deck.name);
@@ -141,6 +141,8 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
   const [priceFetching, setPriceFetching] = useState(false);
   const [priceFetched, setPriceFetched] = useState(false);
   const [detailCard, setDetailCard] = useState<Card | null>(null);
+  const [showNotes, setShowNotes] = useState(false);
+  const [notesInput, setNotesInput] = useState(deck.notes ?? "");
 
   const priceSupported = PRICING_SUPPORTED_GAMES.includes(deck.game);
   const deckTotal = getDeckTotalPrice(priceMap, deck);
@@ -237,6 +239,13 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
                 </button>
               )}
               <button
+                onClick={() => setShowNotes((v) => !v)}
+                className={`p-2 rounded-xl glass hover:bg-white/10 transition-all flex-shrink-0 ${showNotes || deck.notes ? "text-amber-400" : "text-white/30 hover:text-white/70"}`}
+                title="Deck notes"
+              >
+                <NotebookPen className="w-3.5 h-3.5" />
+              </button>
+              <button
                 onClick={() => setShowIO(true)}
                 className="p-2 rounded-xl glass hover:bg-white/10 text-white/30 hover:text-white/70 transition-all flex-shrink-0"
                 title="Import / Export"
@@ -266,6 +275,20 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
             </div>
           </div>
         </div>
+
+        {/* Inline notes editor */}
+        {showNotes && (
+          <div className="mt-2">
+            <textarea
+              value={notesInput}
+              onChange={(e) => setNotesInput(e.target.value)}
+              onBlur={() => setDeckNotes(deck.id, notesInput)}
+              placeholder="Strategy notes, win conditions, card choices…"
+              rows={3}
+              className="w-full px-3 py-2 glass rounded-xl text-xs text-white/70 placeholder-white/20 focus:outline-none resize-none leading-relaxed"
+            />
+          </div>
+        )}
 
         {/* Leader slot — shown for games that require a leader */}
         {LEADER_GAMES.includes(deck.game) && (
