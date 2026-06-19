@@ -200,7 +200,7 @@ Game-specific CDN URL derivation — no external I/O, pure function. Supports: Y
 
 ### PWA / offline
 
-`public/sw.js` is a custom service worker (not Serwist — Serwist requires webpack and Next.js uses Turbopack). Strategy: cache-first for `/_next/static/*`, network-first for navigation, stale-while-revalidate for other same-origin requests. Cross-origin requests are not intercepted. Cache key is `"tcg-builder-v1"`. `next.config.ts` sets `no-cache` headers on `/sw.js` so browsers always fetch the latest. `ServiceWorkerRegistration` is rendered in `src/app/layout.tsx` body to trigger registration on load.
+`public/sw.js` is a custom service worker (not Serwist — Serwist requires webpack and Next.js uses Turbopack). Two caches: `"tcg-builder-v1"` (app shell) and `"tcg-images-v1"` (card images). Strategies: cache-first for `/_next/static/*` and card image CDN hostnames (`IMAGE_HOSTS` set), network-first for navigation, stale-while-revalidate for other same-origin assets. Card images are populated on first view and served from cache when offline — opaque (no-CORS) responses are stored as-is since browsers can render them in `<img>`. Price API requests are not intercepted. `next.config.ts` sets `no-cache` headers on `/sw.js`. `ServiceWorkerRegistration` is rendered in `src/app/layout.tsx` body to trigger registration on load.
 
 ### AI analysis
 
