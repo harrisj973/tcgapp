@@ -13,6 +13,52 @@ interface CardSearchProps {
   onAddCard: (card: Card) => void;
 }
 
+// Per-game simplified type chips. The `match` value is used with includes() on the card's type field.
+const CHIP_TYPES: Partial<Record<TCGGame, Array<{ label: string; match: string }>>> = {
+  yugioh: [
+    { label: "Monster", match: "monster" },
+    { label: "Spell", match: "spell" },
+    { label: "Trap", match: "trap" },
+  ],
+  pokemon: [
+    { label: "Pokémon", match: "pokémon" },
+    { label: "Trainer", match: "trainer" },
+    { label: "Energy", match: "energy" },
+  ],
+  digimon: [
+    { label: "Digimon", match: "digimon" },
+    { label: "Rookie", match: "rookie" },
+    { label: "Tamer", match: "tamer" },
+    { label: "Option", match: "option" },
+    { label: "Digi-Egg", match: "digi-egg" },
+  ],
+  // Lorcana Characters are Dreamborn/Floodborn/Storyborn — no literal "Character" type in data
+  lorcana: [
+    { label: "Character", match: "born" },
+    { label: "Action", match: "action" },
+    { label: "Item", match: "item" },
+    { label: "Location", match: "location" },
+  ],
+  // SWU Units are split into Ground / Space arena subtypes in the type field
+  swu: [
+    { label: "Leader", match: "leader" },
+    { label: "Base", match: "base" },
+    { label: "Ground", match: "ground" },
+    { label: "Space", match: "space" },
+    { label: "Event", match: "event" },
+    { label: "Upgrade", match: "upgrade" },
+  ],
+  mtg: [
+    { label: "Creature", match: "creature" },
+    { label: "Instant", match: "instant" },
+    { label: "Sorcery", match: "sorcery" },
+    { label: "Enchantment", match: "enchantment" },
+    { label: "Artifact", match: "artifact" },
+    { label: "Land", match: "land" },
+    { label: "Planeswalker", match: "planeswalker" },
+  ],
+};
+
 export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
   const [filters, setFilters] = useState<SearchFilters>({ query: "" });
   const [showFilters, setShowFilters] = useState(false);
@@ -22,6 +68,13 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
   const colors = useMemo(() => getCardColors(game), [game]);
   const rarities = useMemo(() => getCardRarities(game), [game]);
   const costLabel = getGameCostLabel(game);
+
+  // Use predefined chip groups for games with complex/compound type fields;
+  // fall back to natural types for games with clean, few distinct types.
+  const typeChips: Array<{ label: string; match: string }> = useMemo(
+    () => CHIP_TYPES[game] ?? types.map((t) => ({ label: t, match: t })),
+    [game, types]
+  );
 
   const cards = useMemo(() => {
     return searchCards(game, filters);
@@ -56,6 +109,28 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
           )}
         </div>
 
+        {/* Type chips — always visible quick-filter */}
+        {typeChips.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
+            {typeChips.map(({ label, match }) => {
+              const isActive = !!filters.type && filters.type.toLowerCase().includes(match.toLowerCase());
+              return (
+                <button
+                  key={label}
+                  onClick={() => updateFilter("type", isActive ? "" : match)}
+                  className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
+                    isActive
+                      ? "bg-white/20 text-white border-white/25"
+                      : "glass text-white/35 hover:text-white/60 border-white/[0.07]"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -77,17 +152,6 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
         {showFilters && (
           <div className="glass rounded-xl p-3 space-y-2.5">
             <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Type</label>
-                <select
-                  value={filters.type || ""}
-                  onChange={(e) => updateFilter("type", e.target.value)}
-                  className="w-full px-2.5 py-1.5 glass rounded-lg text-xs text-white focus:outline-none appearance-none cursor-pointer"
-                >
-                  <option value="">All Types</option>
-                  {types.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
               <div>
                 <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Color</label>
                 <select

@@ -79,8 +79,10 @@ export function searchCards(game: TCGGame, filters: SearchFilters): Card[] {
   }
 
   if (filters.color) {
+    const fc = filters.color.toLowerCase();
     cards = cards.filter((c) =>
-      c.color?.toLowerCase().includes(filters.color!.toLowerCase())
+      c.color?.toLowerCase().includes(fc) ||
+      c.colors?.some((col) => col.toLowerCase() === fc)
     );
   }
 
