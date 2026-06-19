@@ -44,6 +44,25 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
   );
   const roleGroups = useMemo(() => groupCardsByRole(deck.cards), [deck.cards]);
 
+  const costBuckets = useMemo(() => {
+    const b = [0, 0, 0, 0, 0, 0, 0];
+    for (const { card, quantity } of deck.cards) {
+      const cost = typeof card.cost === "number" ? card.cost : (card.cmc ?? 0);
+      b[Math.min(6, Math.max(0, Math.floor(cost)))] += quantity;
+    }
+    return b;
+  }, [deck.cards]);
+
+  const avgCost = useMemo(() => {
+    let total = 0, count = 0;
+    for (const { card, quantity } of deck.cards) {
+      const cost = typeof card.cost === "number" ? card.cost : (card.cmc ?? 0);
+      total += cost * quantity;
+      count += quantity;
+    }
+    return count > 0 ? total / count : 0;
+  }, [deck.cards]);
+
   const runAIAnalysis = async () => {
     setIsAnalyzing(true);
     try {
@@ -142,6 +161,44 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
                 <span className="text-xs text-white/35">{analysis.archetypeConfidence}%</span>
               </div>
             </div>
+
+            {/* Cost Curve */}
+            {totalCards > 0 && (() => {
+              const maxB = Math.max(1, ...costBuckets);
+              const labels = ["0", "1", "2", "3", "4", "5", "6+"];
+              return (
+                <div className="glass rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm font-semibold text-white">Cost Curve</span>
+                    </div>
+                    <span className="text-xs text-white/30">avg {avgCost.toFixed(1)}</span>
+                  </div>
+                  <div className="flex items-end gap-1.5 h-20">
+                    {costBuckets.map((count, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <span className="text-[9px] text-white/40 tabular-nums leading-none">{count > 0 ? count : ""}</span>
+                        <div
+                          className="w-full rounded-t transition-all"
+                          style={{
+                            height: `${Math.max(3, (count / maxB) * 52)}px`,
+                            background: count > 0
+                              ? `linear-gradient(to top, rgba(59,130,246,0.8), rgba(99,102,241,0.6))`
+                              : "rgba(255,255,255,0.05)",
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-1.5 mt-1.5">
+                    {labels.map((l, i) => (
+                      <div key={i} className="flex-1 text-center text-[9px] text-white/20">{l}</div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Stats */}
             <div className="glass rounded-xl p-4 space-y-3">
