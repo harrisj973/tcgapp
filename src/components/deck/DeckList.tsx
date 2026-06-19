@@ -196,7 +196,10 @@ export function DeckList({ game, onSelectDeck }: DeckListProps) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white truncate">{deck.name}</p>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <p className="text-sm font-bold text-white truncate">{deck.name}</p>
+              {deck.notes && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" title="Has notes" />}
+            </div>
             <DeckProgressBar count={count} min={cfg.deckSize.min} max={cfg.deckSize.max} />
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
