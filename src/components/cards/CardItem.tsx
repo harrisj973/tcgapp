@@ -16,6 +16,7 @@ interface CardItemProps {
   price?: number;
   onAdd?: (card: Card) => void;
   onRemove?: (card: Card) => void;
+  onDetail?: (card: Card) => void;
   compact?: boolean;
 }
 
@@ -99,7 +100,7 @@ function RarityBadge({ rarity }: { rarity?: string }) {
   );
 }
 
-export function CardItem({ card, deck, quantity, showSynergy = true, showImage = false, price, onAdd, onRemove, compact = false }: CardItemProps) {
+export function CardItem({ card, deck, quantity, showSynergy = true, showImage = false, price, onAdd, onRemove, onDetail, compact = false }: CardItemProps) {
   const synergy = deck && showSynergy ? calculateCardSynergy(card, deck) : null;
   const borderColor = getColorBorder(card.color);
   const dotColor = getColorDot(card.color);
@@ -109,41 +110,46 @@ export function CardItem({ card, deck, quantity, showSynergy = true, showImage =
   if (compact) {
     return (
       <div className={`flex items-center gap-2 pl-0 pr-3 py-1.5 rounded-xl glass border-l-4 ${borderColor} overflow-hidden transition-all hover:bg-white/[0.06] ${card.banned ? "opacity-50" : ""}`}>
-        {/* Thumbnail or type icon */}
-        {imageUrl ? (
-          <div className="relative w-8 h-11 ml-1.5 flex-shrink-0 rounded overflow-hidden bg-white/5">
-            <NextImage
-              src={imageUrl}
-              alt=""
-              fill
-              sizes="32px"
-              className="object-cover object-top"
-              onError={(e) => {
-                const wrap = e.currentTarget.parentElement;
-                if (wrap) {
-                  wrap.innerHTML = `<span class="flex items-center justify-center w-full h-full text-xs">${typeIcon}</span>`;
-                }
-              }}
-            />
-          </div>
-        ) : (
-          <span className="text-sm pl-2 shrink-0">{typeIcon}</span>
-        )}
+        {/* Tappable body: thumbnail + name → opens detail */}
+        <button
+          onClick={() => onDetail?.(card)}
+          className="flex items-center gap-2 flex-1 min-w-0 text-left"
+        >
+          {imageUrl ? (
+            <div className="relative w-8 h-11 ml-1.5 flex-shrink-0 rounded overflow-hidden bg-white/5">
+              <NextImage
+                src={imageUrl}
+                alt=""
+                fill
+                sizes="32px"
+                className="object-cover object-top"
+                onError={(e) => {
+                  const wrap = e.currentTarget.parentElement;
+                  if (wrap) {
+                    wrap.innerHTML = `<span class="flex items-center justify-center w-full h-full text-xs">${typeIcon}</span>`;
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <span className="text-sm pl-2 shrink-0">{typeIcon}</span>
+          )}
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-sm font-medium text-white truncate">{card.name}</span>
-            {card.banned && <span className="text-[10px] bg-red-500/20 text-red-400 px-1 rounded font-bold">BAN</span>}
-            {card.limited && <span className="text-[10px] bg-orange-500/20 text-orange-400 px-1 rounded font-bold">LIM</span>}
-            {card.semiLimited && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1 rounded font-bold">SL</span>}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-sm font-medium text-white truncate">{card.name}</span>
+              {card.banned && <span className="text-[10px] bg-red-500/20 text-red-400 px-1 rounded font-bold">BAN</span>}
+              {card.limited && <span className="text-[10px] bg-orange-500/20 text-orange-400 px-1 rounded font-bold">LIM</span>}
+              {card.semiLimited && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1 rounded font-bold">SL</span>}
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              {card.color && <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${dotColor}`} />}
+              <span className="text-xs text-white/30 truncate">{card.type}</span>
+              {card.cost !== undefined && <span className="text-xs text-blue-400/80 shrink-0">· {card.cost}</span>}
+              {card.rarity && <RarityBadge rarity={card.rarity} />}
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            {card.color && <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${dotColor}`} />}
-            <span className="text-xs text-white/30 truncate">{card.type}</span>
-            {card.cost !== undefined && <span className="text-xs text-blue-400/80 shrink-0">· {card.cost}</span>}
-            {card.rarity && <RarityBadge rarity={card.rarity} />}
-          </div>
-        </div>
+        </button>
 
         {synergy && <SynergyBadge color={synergy.color} size="sm" />}
         {price !== undefined && (

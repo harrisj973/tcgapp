@@ -9,6 +9,7 @@ import { getCardImageUrl } from "@/lib/card-images";
 import { CardSearch } from "@/components/cards/CardSearch";
 import { CardItem } from "@/components/cards/CardItem";
 import { DeckAnalysisPanel } from "@/components/analysis/DeckAnalysisPanel";
+import { CardDetailModal } from "@/components/cards/CardDetailModal";
 import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarSign, Loader2, TrendingUp, LayoutGrid, List } from "lucide-react";
 import { DeckIOModal } from "./DeckIOModal";
 import { DrawCalcPanel } from "./DrawCalcPanel";
@@ -137,6 +138,7 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
   const [priceMap, setPriceMap] = useState<Map<string, number>>(new Map());
   const [priceFetching, setPriceFetching] = useState(false);
   const [priceFetched, setPriceFetched] = useState(false);
+  const [detailCard, setDetailCard] = useState<Card | null>(null);
 
   const priceSupported = PRICING_SUPPORTED_GAMES.includes(deck.game);
   const deckTotal = getDeckTotalPrice(priceMap, deck);
@@ -379,6 +381,7 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
                                 price={priceMap.get(dc.card.id)}
                                 onAdd={handleAddCard}
                                 onRemove={handleRemoveCard}
+                                onDetail={setDetailCard}
                                 compact={true}
                               />
                             </div>
@@ -409,6 +412,16 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
       </div>
 
       {showIO && <DeckIOModal deck={deck} onClose={() => setShowIO(false)} />}
+
+      {detailCard && (
+        <CardDetailModal
+          card={detailCard}
+          quantity={deck.cards.find((dc) => dc.card.id === detailCard.id)?.quantity}
+          onAdd={handleAddCard}
+          onRemove={handleRemoveCard}
+          onClose={() => setDetailCard(null)}
+        />
+      )}
     </div>
   );
 }

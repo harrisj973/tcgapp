@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { Card, Deck, TCGGame, SearchFilters } from "@/types";
 import { searchCards, getCardTypes, getCardColors } from "@/lib/card-database";
 import { CardItem } from "./CardItem";
+import { CardDetailModal } from "./CardDetailModal";
 import { Search, Filter, X, ChevronDown } from "lucide-react";
 
 interface CardSearchProps {
@@ -15,6 +16,7 @@ interface CardSearchProps {
 export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
   const [filters, setFilters] = useState<SearchFilters>({ query: "" });
   const [showFilters, setShowFilters] = useState(false);
+  const [detailCard, setDetailCard] = useState<Card | null>(null);
 
   const types = useMemo(() => getCardTypes(game), [game]);
   const colors = useMemo(() => getCardColors(game), [game]);
@@ -125,12 +127,22 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
               card={card}
               deck={deck}
               onAdd={onAddCard}
+              onDetail={setDetailCard}
               compact={true}
               showImage={cards.length <= 200}
             />
           ))
         )}
       </div>
+
+      {detailCard && (
+        <CardDetailModal
+          card={detailCard}
+          quantity={deck?.cards.find((dc) => dc.card.id === detailCard.id)?.quantity}
+          onAdd={(c) => { onAddCard(c); }}
+          onClose={() => setDetailCard(null)}
+        />
+      )}
     </div>
   );
 }
