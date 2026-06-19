@@ -149,6 +149,7 @@ export interface SearchFilters {
   type?: string;
   color?: string;
   cost?: number;
+  maxCost?: number;
   rarity?: string;
   set?: string;
   banned?: boolean;

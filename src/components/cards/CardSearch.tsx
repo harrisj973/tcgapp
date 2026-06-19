@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Card, Deck, TCGGame, SearchFilters } from "@/types";
-import { searchCards, getCardTypes, getCardColors } from "@/lib/card-database";
+import { searchCards, getCardTypes, getCardColors, getCardRarities, getGameCostLabel } from "@/lib/card-database";
 import { CardItem } from "./CardItem";
 import { CardDetailModal } from "./CardDetailModal";
 import { Search, Filter, X, ChevronDown } from "lucide-react";
@@ -20,16 +20,18 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
 
   const types = useMemo(() => getCardTypes(game), [game]);
   const colors = useMemo(() => getCardColors(game), [game]);
+  const rarities = useMemo(() => getCardRarities(game), [game]);
+  const costLabel = getGameCostLabel(game);
 
   const cards = useMemo(() => {
     return searchCards(game, filters);
   }, [game, filters]);
 
-  const updateFilter = (key: keyof SearchFilters, value: string | boolean | undefined) => {
-    setFilters((prev) => ({ ...prev, [key]: value || undefined }));
+  const updateFilter = (key: keyof SearchFilters, value: string | number | boolean | undefined) => {
+    setFilters((prev) => ({ ...prev, [key]: value === "" ? undefined : value }));
   };
 
-  const hasActiveFilters = filters.type || filters.color || filters.banned === false;
+  const hasActiveFilters = filters.type || filters.color || filters.rarity || filters.maxCost !== undefined || filters.banned === false;
 
   return (
     <div className="flex flex-col h-full">
@@ -97,11 +99,38 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
                   {colors.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
+              <div>
+                <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Rarity</label>
+                <select
+                  value={filters.rarity || ""}
+                  onChange={(e) => updateFilter("rarity", e.target.value)}
+                  className="w-full px-2.5 py-1.5 glass rounded-lg text-xs text-white focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="">All Rarities</option>
+                  {rarities.map((r) => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              {costLabel && (
+                <div>
+                  <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Max {costLabel}</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={99}
+                    placeholder="Any"
+                    value={filters.maxCost ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      updateFilter("maxCost", v === "" ? undefined : Number(v));
+                    }}
+                    className="w-full px-2.5 py-1.5 glass rounded-lg text-xs text-white focus:outline-none appearance-none"
+                  />
+                </div>
+              )}
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                id="hideBanned"
                 checked={filters.banned === false}
                 onChange={(e) => updateFilter("banned", e.target.checked ? false : undefined)}
                 className="rounded"

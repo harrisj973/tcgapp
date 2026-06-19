@@ -90,6 +90,13 @@ export function searchCards(game: TCGGame, filters: SearchFilters): Card[] {
     );
   }
 
+  if (filters.maxCost !== undefined) {
+    cards = cards.filter((c) => {
+      const cost = typeof c.cost === "number" ? c.cost : (c.cmc ?? c.level);
+      return cost !== undefined && cost <= filters.maxCost!;
+    });
+  }
+
   if (filters.banned === false) {
     cards = cards.filter((c) => !c.banned);
   }
@@ -109,4 +116,29 @@ export function getCardTypes(game: TCGGame): string[] {
 export function getCardColors(game: TCGGame): string[] {
   const cards = getCardsForGame(game);
   return [...new Set(cards.map((c) => c.color).filter(Boolean) as string[])];
+}
+
+export function getCardRarities(game: TCGGame): string[] {
+  const cards = getCardsForGame(game);
+  const rarities = [...new Set(cards.map((c) => c.rarity).filter(Boolean) as string[])];
+  // Sort from most to least rare so the dropdown reads naturally
+  const order = ["Secret Rare", "Mega Hyper Rare", "Hyper Rare", "Special Illustration Rare",
+    "Ultra Rare", "Super Rare", "Mythic Rare", "Rare", "Illustration Rare", "Uncommon", "Common",
+    "Leader", "Legendary", "Legend Rare", "Promo"];
+  return rarities.sort((a, b) => {
+    const ai = order.indexOf(a);
+    const bi = order.indexOf(b);
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
+
+// Whether this game uses a numeric cost/level field worth filtering
+export function getGameCostLabel(game: TCGGame): string | null {
+  if (game === "yugioh") return "Level";
+  if (game === "pokemon") return null;
+  if (game === "mtg") return "CMC";
+  return "Cost";
 }
