@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geist.variable} h-full`}>
-      <body className="h-full overflow-hidden text-white antialiased">{children}</body>
+      <body className="h-full overflow-hidden text-white antialiased">
+        <ServiceWorkerRegistration />
+        {children}
+      </body>
     </html>
   );
 }
