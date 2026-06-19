@@ -35,15 +35,17 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/lib/ua-cards.ts` | **~4k-line** array `UA_CARDS: Card[]` — Union Arena database (4,050 cards) |
 | `src/lib/yugioh-cards.ts` | **~large** array `YUGIOH_CARDS: Card[]` — Yu-Gi-Oh! database (12,568 unique cards, deduplicated by name) |
 | `src/lib/mtg-cards.ts` | **~large, split into 9 chunk files** `MTG_CARDS: Card[]` — MTG database (24,783 unique cards, deduplicated by oracle_id) |
+| `src/lib/riftbound-cards.ts` | `RIFTBOUND_CARDS: Card[]` — Riftbound database (350 cards, OGS set) |
 | `src/lib/deck-store.ts` | Zustand store (persisted to `localStorage` as `"tcg-deck-builder"`) — source of truth for all decks and selected game |
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
 | `src/lib/card-images.ts` | Derives CDN image URLs from card IDs for each game — no external I/O |
-| `src/lib/card-prices.ts` | Fetches live prices: YGOPRODeck API (YGO) + Scryfall collection API (MTG, up to 75/batch). In-memory cache keyed by card ID. `PRICING_SUPPORTED_GAMES`, `fetchDeckPrices`, `getDeckTotalPrice` |
+| `src/lib/card-prices.ts` | Fetches live prices: YGOPRODeck API (YGO) + Scryfall collection API (MTG, up to 75/batch) + pokemontcg.io (Pokémon, up to 20/batch). In-memory cache keyed by card ID; unmatched cards cached as 0 to prevent re-fetching. `PRICING_SUPPORTED_GAMES`, `fetchDeckPrices`, `getDeckTotalPrice` |
 | `src/lib/deck-io.ts` | `exportDeckText` / `importDeckText` (parses `4x`/`4 `/`x4` formats); `encodeDeckToUrl` / `decodeDeckFromUrl` (unicode-safe btoa via `encodeURIComponent`) |
 | `src/lib/deck-legality.ts` | `checkDeckLegality(deck): LegalityIssue[]` — validates deck size, banned cards, limited/semi-limited copy counts, and per-game max copies |
 | `src/lib/draw-probability.ts` | Hypergeometric distribution for draw odds. `calculateDrawOdds(entries, deckSize, openingHandSize)` returns opening-hand and by-turn-3 probabilities |
 | `src/lib/card-roles.ts` | Keyword-based role detection: `detectCardRole(card)` scans description/effect/tags and returns one of 11 `CardRole` strings. `groupCardsByRole(deckCards)` used by the Analysis tab |
+| `src/components/ServiceWorkerRegistration.tsx` | `"use client"` null component — registers `/sw.js` on mount for PWA offline support |
 
 ### Component tree
 
@@ -52,8 +54,10 @@ page.tsx (view state machine)
 ├── GameSelector        — horizontal scroll of TCG icons
 ├── DeckList            — folder/tag organizer; DeckMetaPopover for per-deck color tags + folder assignment
 ├── DeckBuilder         — 5-tab editor: Search | Deck | Analysis | Odds | Play
-│   ├── CardSearch      — calls searchCards(), renders CardItem list; grid/list toggle
-│   ├── CardItem        — single card row with add/remove; GridCardTile for grid view
+│   ├── CardSearch      — calls searchCards(), renders CardItem list; grid/list toggle; rarity + max-cost filters
+│   ├── CardItem        — single card row with add/remove; tapping the card face opens CardDetailModal
+│   ├── CardDetailModal — bottom-sheet with full card image, stats, description, add/remove actions
+│   ├── LeaderPickerModal — bottom-sheet for picking a Leader card (One Piece + SWU only)
 │   ├── DeckAnalysisPanel — AI insights (server action) + Roles tab (card-roles.ts)
 │   ├── DrawCalcPanel   — hypergeometric draw probability calculator (draw-probability.ts)
 │   ├── PlaytestPanel   — Fisher-Yates shuffle simulator with draw/mulligan/reset
@@ -79,7 +83,7 @@ Text opacity scale: primary `text-white`, secondary `text-white/50`, muted `text
 
 ### Card databases
 
-Nine games have full real card databases in dedicated files; DBS and DBS Fusion World have small representative stubs inline in `card-database.ts`.
+Ten games have full real card databases in dedicated files; DBS and DBS Fusion World have small representative stubs inline in `card-database.ts`.
 
 #### One Piece (`opcg-cards.ts`)
 
@@ -154,6 +158,14 @@ Deduplicated by card name (one entry per unique card, ignoring reprints). Banlis
 
 **Card ID format:** `"ygo-{password}"` e.g. `"ygo-89631139"`. Main deck: 40–60 cards. Extra deck: up to 15 (Fusion/Synchro/Xyz/Link). Max 3 copies (unless banlist restricts).
 
+#### Riftbound (`riftbound-cards.ts`)
+
+Riot Games' card game. Currently **OGS (350 cards)**.
+
+**Card ID format:** `"riftbound-{setCode}_{num}"` e.g. `"riftbound-ogs_001"`.
+
+**Card types:** Unit (subtypes: Champion, Follower), Spell, Equipment. Colors: Red, Blue, Green, Yellow, Purple, White. `rarity`: Common, Uncommon, Rare, Epic, Legendary.
+
 #### Magic: The Gathering (`mtg-cards.ts`)
 
 Deduplicated by Scryfall `oracle_id` (one entry per unique card face). Split into 9 chunk arrays and concatenated — do not edit the chunks directly; regenerate from source if updating. Deck size: 60 cards. Max 4 copies (except basic lands).
@@ -167,14 +179,15 @@ Zustand store (`useDeckStore`) is persisted via `localStorage`. It holds the ful
 - **4-copy limit:** pokemon, mtg, lorcana, digimon, unionarena
 - **3-copy limit:** all other games
 
-One Piece decks use a `leader` field on `Deck` (separate from `cards`). Decks support `folder?: string` and `colorTag?: string` for organization (stored in Zustand, persisted to localStorage).
+One Piece and SWU decks use a `leader` field on `Deck` (separate from `cards`), set via `setDeckLeader`. Decks support `folder?: string`, `colorTag?: string`, and `notes?: string` for organization and annotation (stored in Zustand, persisted to localStorage). `setDeckNotes` auto-saves notes on blur.
 
 ### Deck features
 
 | Feature | Entry point | Notes |
 |---|---|---|
 | Legality check | `checkDeckLegality` → `DeckBuilder` Deck tab | Red ring on illegal card rows; issues panel above card list |
-| Price lookup | `fetchDeckPrices` → price button in DeckBuilder | Only YGO and MTG; in-memory cache; `$0.00` cards cached (isNaN guard) |
+| Price lookup | `fetchDeckPrices` → price button in DeckBuilder | YGO, MTG, Pokémon; in-memory cache; unmatched cards cached as 0 |
+| Deck notes | `setDeckNotes` → DeckBuilder notes toggle | Inline textarea, amber indicator when notes exist, saves on blur |
 | Draw calculator | `DrawCalcPanel` (Odds tab) | Hypergeometric; `openingHandSize` per game in `games.ts` |
 | Playtest | `PlaytestPanel` (Play tab) | Fisher-Yates shuffle; draw/mulligan/reset; card thumbnails via `card-images.ts` |
 | Import/Export | `DeckIOModal` (ArrowLeftRight button) | Text export, share URL (unicode-safe btoa), PNG via html2canvas |
@@ -184,6 +197,10 @@ One Piece decks use a `leader` field on `Deck` (separate from `cards`). Decks su
 ### Card images (`card-images.ts`)
 
 Game-specific CDN URL derivation — no external I/O, pure function. Supports: YGO (ygoprodeck), MTG (Scryfall), Pokémon (pokemontcg.io), Lorcana (lorcast CDN), One Piece (limitlesstcg), Digimon (apitcg; strips leading zero from set number: `bt01` → `BT1`), Gundam (apitcg), SWU (swu-db CDN). Images shown in search when `cards.length <= 200`; always shown in deck/playtest view.
+
+### PWA / offline
+
+`public/sw.js` is a custom service worker (not Serwist — Serwist requires webpack and Next.js uses Turbopack). Strategy: cache-first for `/_next/static/*`, network-first for navigation, stale-while-revalidate for other same-origin requests. Cross-origin requests are not intercepted. Cache key is `"tcg-builder-v1"`. `next.config.ts` sets `no-cache` headers on `/sw.js` so browsers always fetch the latest. `ServiceWorkerRegistration` is rendered in `src/app/layout.tsx` body to trigger registration on load.
 
 ### AI analysis
 
