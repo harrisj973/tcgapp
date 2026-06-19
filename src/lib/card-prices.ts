@@ -155,14 +155,63 @@ async function fetchPokemonPrices(deck: Deck): Promise<Map<string, number>> {
   return results;
 }
 
+// ── Disney Lorcana (Lorcast API — free, open CORS) ───────────────────────
+
+// Convert our card ID to Lorcast path: "lorcana-tfc_001" → "TFC/1"
+function lorcanaCardToApiPath(cardId: string): string | null {
+  const code = cardId.slice("lorcana-".length); // "tfc_001"
+  const ul = code.lastIndexOf("_");
+  if (ul === -1) return null;
+  const setCode = code.slice(0, ul).toUpperCase(); // "TFC"
+  const num = parseInt(code.slice(ul + 1), 10);    // 1
+  return isNaN(num) ? null : `${setCode}/${num}`;
+}
+
+async function fetchLorcanaPrices(deck: Deck): Promise<Map<string, number>> {
+  const results = new Map<string, number>();
+  const toFetch = deck.cards.filter((dc) => !cache.has(dc.card.id));
+
+  await Promise.allSettled(
+    toFetch.map(async ({ card }) => {
+      const path = lorcanaCardToApiPath(card.id);
+      if (!path) { cache.set(card.id, 0); return; }
+      try {
+        const res = await fetch(
+          `https://api.lorcast.com/v0/cards/${path}`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+        if (!res.ok) { cache.set(card.id, 0); return; }
+        const json = await res.json();
+        // Lorcast returns prices nested under tcgplayer.prices.{variant}.market
+        const pricesObj = json.tcgplayer?.prices ?? {};
+        const variants = Object.values(pricesObj) as Array<{ market?: number | null }>;
+        const market = variants.map((v) => v?.market).find((m) => typeof m === "number" && m > 0);
+        if (typeof market === "number") {
+          cache.set(card.id, market);
+          results.set(card.id, market);
+        } else {
+          cache.set(card.id, 0);
+        }
+      } catch { cache.set(card.id, 0); }
+    })
+  );
+
+  for (const { card } of deck.cards) {
+    const p = cache.get(card.id);
+    if (p !== undefined) results.set(card.id, p);
+  }
+  return results;
+}
+
 // ── Public entry point ─────────────────────────────────────────────────────
 
-export const PRICING_SUPPORTED_GAMES: TCGGame[] = ["yugioh", "mtg", "pokemon"];
+export const PRICING_SUPPORTED_GAMES: TCGGame[] = ["yugioh", "mtg", "pokemon", "lorcana"];
 
 export async function fetchDeckPrices(deck: Deck): Promise<Map<string, number>> {
   if (deck.game === "yugioh") return fetchYGOPrices(deck);
   if (deck.game === "mtg") return fetchMTGPrices(deck);
   if (deck.game === "pokemon") return fetchPokemonPrices(deck);
+  if (deck.game === "lorcana") return fetchLorcanaPrices(deck);
   return new Map();
 }
 

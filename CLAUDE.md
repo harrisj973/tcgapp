@@ -40,7 +40,7 @@ There are no tests. Use `npx tsc --noEmit && npm run build` to verify correctnes
 | `src/lib/synergy-engine.ts` | Pure functions: `calculateCardSynergy`, `analyzeDeck` — no I/O |
 | `src/lib/ai-analysis.ts` | `"use server"` — calls Claude (`claude-haiku-4-5-20251001`) via `@anthropic-ai/sdk` for AI deck insights |
 | `src/lib/card-images.ts` | Derives CDN image URLs from card IDs for each game — no external I/O |
-| `src/lib/card-prices.ts` | Fetches live prices: YGOPRODeck API (YGO) + Scryfall collection API (MTG, up to 75/batch) + pokemontcg.io (Pokémon, up to 20/batch). In-memory cache keyed by card ID; unmatched cards cached as 0 to prevent re-fetching. `PRICING_SUPPORTED_GAMES`, `fetchDeckPrices`, `getDeckTotalPrice` |
+| `src/lib/card-prices.ts` | Fetches live prices: YGOPRODeck API (YGO) + Scryfall collection API (MTG, up to 75/batch) + pokemontcg.io (Pokémon, up to 20/batch) + Lorcast API (Lorcana, per-card `GET /v0/cards/{SET}/{num}`). In-memory cache keyed by card ID; unmatched cards cached as 0 to prevent re-fetching. `PRICING_SUPPORTED_GAMES`, `fetchDeckPrices`, `getDeckTotalPrice` |
 | `src/lib/deck-io.ts` | `exportDeckText` / `importDeckText` (parses `4x`/`4 `/`x4` formats); `encodeDeckToUrl` / `decodeDeckFromUrl` (unicode-safe btoa via `encodeURIComponent`) |
 | `src/lib/deck-legality.ts` | `checkDeckLegality(deck): LegalityIssue[]` — validates deck size, banned cards, limited/semi-limited copy counts, and per-game max copies |
 | `src/lib/draw-probability.ts` | Hypergeometric distribution for draw odds. `calculateDrawOdds(entries, deckSize, openingHandSize)` returns opening-hand and by-turn-3 probabilities |
