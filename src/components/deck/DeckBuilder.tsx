@@ -14,6 +14,7 @@ import { LayersIcon, Search, BarChart3, Edit3, Check, X, ArrowLeftRight, DollarS
 import { DeckIOModal } from "./DeckIOModal";
 import { DrawCalcPanel } from "./DrawCalcPanel";
 import { PlaytestPanel } from "./PlaytestPanel";
+import { LeaderPickerModal, LEADER_GAMES } from "./LeaderPickerModal";
 import { fetchDeckPrices, getDeckTotalPrice, PRICING_SUPPORTED_GAMES } from "@/lib/card-prices";
 import { checkDeckLegality } from "@/lib/deck-legality";
 import { AlertTriangle, AlertCircle, Swords } from "lucide-react";
@@ -129,11 +130,12 @@ function GridCardTile({ card, onRemove }: { card: Card; onAdd?: () => void; onRe
 }
 
 export function DeckBuilder({ deck }: DeckBuilderProps) {
-  const { addCard, removeCard, renameDeck, getDeckCardCount } = useDeckStore();
+  const { addCard, removeCard, renameDeck, getDeckCardCount, setDeckLeader } = useDeckStore();
   const [activeTab, setActiveTab] = useState<ActiveTab>("search");
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(deck.name);
   const [showIO, setShowIO] = useState(false);
+  const [showLeaderPicker, setShowLeaderPicker] = useState(false);
   const [deckViewMode, setDeckViewMode] = useState<"list" | "grid">("list");
   const [priceMap, setPriceMap] = useState<Map<string, number>>(new Map());
   const [priceFetching, setPriceFetching] = useState(false);
@@ -265,12 +267,30 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
           </div>
         </div>
 
-        {/* Leader display */}
-        {deck.leader && (
-          <div className="mt-2 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <span className="text-[10px] text-amber-400 font-semibold uppercase tracking-wide">Leader</span>
-            <span className="text-xs text-amber-300/80 truncate">{deck.leader.name}</span>
-          </div>
+        {/* Leader slot — shown for games that require a leader */}
+        {LEADER_GAMES.includes(deck.game) && (
+          <button
+            onClick={() => setShowLeaderPicker(true)}
+            className={`mt-2 w-full flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all text-left ${
+              deck.leader
+                ? "bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/15"
+                : "bg-white/[0.03] border-dashed border-white/20 hover:border-white/40"
+            }`}
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-400">Leader</span>
+            <span className={`text-xs truncate flex-1 ${deck.leader ? "text-amber-300/80" : "text-white/25"}`}>
+              {deck.leader ? deck.leader.name : "Tap to select…"}
+            </span>
+            {deck.leader && (
+              <span
+                role="button"
+                onClick={(e) => { e.stopPropagation(); setDeckLeader(deck.id, undefined); }}
+                className="text-white/20 hover:text-white/50 transition-colors text-xs px-1"
+              >
+                ×
+              </span>
+            )}
+          </button>
         )}
       </div>
 
@@ -412,6 +432,15 @@ export function DeckBuilder({ deck }: DeckBuilderProps) {
       </div>
 
       {showIO && <DeckIOModal deck={deck} onClose={() => setShowIO(false)} />}
+
+      {showLeaderPicker && (
+        <LeaderPickerModal
+          game={deck.game}
+          currentLeader={deck.leader}
+          onSelect={(leader) => setDeckLeader(deck.id, leader)}
+          onClose={() => setShowLeaderPicker(false)}
+        />
+      )}
 
       {detailCard && (
         <CardDetailModal
