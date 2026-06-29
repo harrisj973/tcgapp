@@ -27,7 +27,6 @@ const CHIP_TYPES: Partial<Record<TCGGame, Array<{ label: string; match: string }
   ],
   digimon: [
     { label: "Digimon", match: "digimon" },
-    { label: "Rookie", match: "rookie" },
     { label: "Tamer", match: "tamer" },
     { label: "Option", match: "option" },
     { label: "Digi-Egg", match: "digi-egg" },
@@ -64,7 +63,7 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [detailCard, setDetailCard] = useState<Card | null>(null);
 
-  const types = useMemo(() => getCardTypes(game), [game]);
+  const types = useMemo(() => (CHIP_TYPES[game] ? [] : getCardTypes(game)), [game]);
   const colors = useMemo(() => getCardColors(game), [game]);
   const rarities = useMemo(() => getCardRarities(game), [game]);
   const costLabel = getGameCostLabel(game);
@@ -121,7 +120,7 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
                   className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
                     isActive
                       ? "bg-white/20 text-white border-white/25"
-                      : "glass text-white/35 hover:text-white/60 border-white/[0.07]"
+                      : "glass text-white/30 hover:text-white/60 border-white/[0.07]"
                   }`}
                 >
                   {label}
@@ -153,7 +152,7 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
           <div className="glass rounded-xl p-3 space-y-2.5">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Color</label>
+                <label className="block text-[10px] text-white/30 mb-1 uppercase tracking-wider">Color</label>
                 <select
                   value={filters.color || ""}
                   onChange={(e) => updateFilter("color", e.target.value)}
@@ -164,7 +163,7 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Rarity</label>
+                <label className="block text-[10px] text-white/30 mb-1 uppercase tracking-wider">Rarity</label>
                 <select
                   value={filters.rarity || ""}
                   onChange={(e) => updateFilter("rarity", e.target.value)}
@@ -176,7 +175,7 @@ export function CardSearch({ game, deck, onAddCard }: CardSearchProps) {
               </div>
               {costLabel && (
                 <div>
-                  <label className="block text-[10px] text-white/35 mb-1 uppercase tracking-wider">Max {costLabel}</label>
+                  <label className="block text-[10px] text-white/30 mb-1 uppercase tracking-wider">Max {costLabel}</label>
                   <input
                     type="number"
                     min={0}

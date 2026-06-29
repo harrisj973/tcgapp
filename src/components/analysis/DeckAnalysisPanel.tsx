@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { Deck } from "@/types";
 import { analyzeDeck } from "@/lib/synergy-engine";
 import { groupCardsByRole, getRoleColor } from "@/lib/card-roles";
+import { buildCostCurve } from "@/components/deck/DeckBuilder";
 import { StatBar } from "@/components/ui/StatBar";
 import { SynergyBadge } from "@/components/ui/SynergyBadge";
 import { CardColor } from "@/types";
@@ -44,19 +45,14 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
   );
   const roleGroups = useMemo(() => groupCardsByRole(deck.cards), [deck.cards]);
 
-  const costBuckets = useMemo(() => {
-    const b = [0, 0, 0, 0, 0, 0, 0];
-    for (const { card, quantity } of deck.cards) {
-      const cost = typeof card.cost === "number" ? card.cost : (card.cmc ?? 0);
-      b[Math.min(6, Math.max(0, Math.floor(cost)))] += quantity;
-    }
-    return b;
-  }, [deck.cards]);
+  const costBuckets = useMemo(() => buildCostCurve(deck.cards), [deck.cards]);
 
   const avgCost = useMemo(() => {
     let total = 0, count = 0;
     for (const { card, quantity } of deck.cards) {
-      const cost = typeof card.cost === "number" ? card.cost : (card.cmc ?? 0);
+      const hasCost = typeof card.cost === "number" || card.cmc !== undefined;
+      if (!hasCost) continue;
+      const cost = typeof card.cost === "number" ? card.cost : card.cmc!;
       total += cost * quantity;
       count += quantity;
     }
@@ -178,7 +174,7 @@ export function DeckAnalysisPanel({ deck }: DeckAnalysisPanelProps) {
                   <div className="flex items-end gap-1.5 h-20">
                     {costBuckets.map((count, i) => (
                       <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                        <span className="text-[9px] text-white/40 tabular-nums leading-none">{count > 0 ? count : ""}</span>
+                        <span className="text-[9px] text-white/30 tabular-nums leading-none">{count > 0 ? count : ""}</span>
                         <div
                           className="w-full rounded-t transition-all"
                           style={{

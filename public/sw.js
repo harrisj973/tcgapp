@@ -63,7 +63,7 @@ self.addEventListener("fetch", (event) => {
         return fetch(request)
           .then((res) => {
             if (res.ok || res.type === "opaque") {
-              caches.open(IMAGE_CACHE).then((c) => c.put(request, res.clone()));
+              event.waitUntil(caches.open(IMAGE_CACHE).then((c) => c.put(request, res.clone())));
             }
             return res;
           })
@@ -83,7 +83,7 @@ self.addEventListener("fetch", (event) => {
         (hit) =>
           hit ||
           fetch(request).then((res) => {
-            if (res.ok) caches.open(CACHE).then((c) => c.put(request, res.clone()));
+            if (res.ok) event.waitUntil(caches.open(CACHE).then((c) => c.put(request, res.clone())));
             return res;
           })
       )
@@ -96,7 +96,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((res) => {
-          if (res.ok) caches.open(CACHE).then((c) => c.put(request, res.clone()));
+          if (res.ok) event.waitUntil(caches.open(CACHE).then((c) => c.put(request, res.clone())));
           return res;
         })
         .catch(() => caches.match(request).then((hit) => hit || caches.match("/")))
@@ -108,7 +108,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(request).then((hit) => {
       const fresh = fetch(request).then((res) => {
-        if (res.ok) caches.open(CACHE).then((c) => c.put(request, res.clone()));
+        if (res.ok) event.waitUntil(caches.open(CACHE).then((c) => c.put(request, res.clone())));
         return res;
       });
       return hit || fresh;

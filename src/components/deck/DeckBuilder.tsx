@@ -25,10 +25,12 @@ interface DeckBuilderProps {
 
 type ActiveTab = "cards" | "search" | "analysis" | "calc" | "play";
 
-function buildCostCurve(cards: DeckCard[]): number[] {
+export function buildCostCurve(cards: DeckCard[]): number[] {
   const buckets = [0, 0, 0, 0, 0, 0, 0];
   for (const { card, quantity } of cards) {
-    const cost = typeof card.cost === "number" ? card.cost : (card.cmc ?? 0);
+    const hasCost = typeof card.cost === "number" || card.cmc !== undefined;
+    if (!hasCost) continue;
+    const cost = typeof card.cost === "number" ? card.cost : card.cmc!;
     const idx = Math.min(6, Math.max(0, Math.floor(cost)));
     buckets[idx] += quantity;
   }
